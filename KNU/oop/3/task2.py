@@ -17,16 +17,19 @@ class Student(ABC):
 
     def __init__(self, name: str):
         self.name = name
-        self.state = ''
+        self._state = ''
 
     def Relax(self):
-        self.state += 'Relax'
+        self._state += 'Relax'
 
     def Read(self):
-        self.state += 'Read'
+        self._state += 'Read'
 
     def Write(self):
-        self.state += 'Write'
+        self._state += 'Write'
+
+    def GetState(self):
+        return self._state
 
     @abstractmethod
     def Study(self):
@@ -37,7 +40,7 @@ class GoodStudent(Student):
 
     def __init__(self, name: str):
         super().__init__(name)
-        self.state += 'good'
+        self._state += 'good'
 
     def Study(self):
         self.Read()
@@ -51,7 +54,7 @@ class BadStudent(Student):
 
     def __init__(self, name: str):
         super().__init__(name)
-        self.state += 'bad'
+        self._state += 'bad'
 
     def Study(self):
         self.Relax()
@@ -75,12 +78,12 @@ class Group:
         return f'Name: {self.name}; Students: {names}'
 
     def GetFullInfo(self) -> str:
-        info = '\n'.join(f'Name: {st.name}; Status: {st.state}' 
+        info = '\n'.join(f'Name: {st.name}; Status: {st.GetState()}'
                          for st in self.students)
         return f'Group name: {self.name}\nStudents:\n{info}'
 
 
-if __name__ == '__main__':
+def main():
     group = None
     while True:
         option = input(PROMPT)
@@ -108,3 +111,5 @@ if __name__ == '__main__':
                 print('Wrong option!')
 
 
+if __name__ == '__main__':
+    main()

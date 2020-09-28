@@ -27,7 +27,7 @@ class Converter:
         return amount / self._eur
 
 
-if __name__ == '__main__':
+def main():
     usd = float(input('USD: '))
     eur = float(input('EUR: '))
     converter = Converter(usd, eur)
@@ -44,3 +44,5 @@ if __name__ == '__main__':
         amount = float(input('Amount: '))
         print('Converted:', jumpTable[option](amount))
     
+if __name__ == '__main__':
+    main()
