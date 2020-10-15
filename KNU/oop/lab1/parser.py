@@ -2,7 +2,8 @@
 
 tokens = (
     'CELL', 'NUMBER',
-    'PLUS', 'MINUS', 'TIMES', 'DIVIDE', 'MODULO', 'EQUALS',
+    'PLUS', 'MINUS', 'TIMES', 'DIVIDE', 'MODULO',
+    'EQUALS', 'LESS', 'GREATER', 'LTEQ', 'GTEQ',
     'LPAREN', 'RPAREN',
 )
 
@@ -13,6 +14,10 @@ t_MINUS   = r'-'
 t_TIMES   = r'\*'
 t_DIVIDE  = r'/'
 t_MODULO  = r'%'
+t_LTEQ    = r'<='
+t_GTEQ    = r'>='
+t_LESS    = r'<'
+t_GREATER = r'>'
 t_EQUALS  = r'='
 t_LPAREN  = r'\('
 t_RPAREN  = r'\)'
@@ -36,7 +41,7 @@ lex.lex()
 
 # Precedence rules for the arithmetic operators
 precedence = (
-    ('left','EQUALS'),
+    ('left','EQUALS', 'LESS', 'GREATER', 'LTEQ', 'GTEQ'),
     ('left','PLUS','MINUS'),
     ('left','TIMES','DIVIDE', 'MODULO'),
     ('right','UMINUS', 'UPLUS'),
@@ -61,6 +66,10 @@ def p_expression_binop(p):
                | expression DIVIDE expression
                | expression MODULO expression
                | expression EQUALS expression
+               | expression LESS expression
+               | expression GREATER expression
+               | expression LTEQ expression
+               | expression GTEQ expression
     '''
     if p[2] == '+'  : p[0] = p[1] + p[3]
     elif p[2] == '-': p[0] = p[1] - p[3]
@@ -68,6 +77,10 @@ def p_expression_binop(p):
     elif p[2] == '/': p[0] = p[1] / p[3]
     elif p[2] == '%': p[0] = p[1] % p[3]
     elif p[2] == '=': p[0] = int(p[1] == p[3])
+    elif p[2] == '<': p[0] = int(p[1] < p[3])
+    elif p[2] == '>': p[0] = int(p[1] > p[3])
+    elif p[2] == '<=': p[0] = int(p[1] <= p[3])
+    elif p[2] == '>=': p[0] = int(p[1] >= p[3])
 
 def p_expression_uminus(p):
     'expression : MINUS expression %prec UMINUS'
@@ -85,7 +98,7 @@ def p_expression_number(p):
     'expression : NUMBER'
     p[0] = p[1]
 
-def p_expression_name(p):
+def p_expression_cell(p):
     'expression : CELL'
     p[0] = names.get(p[1], 0)
 
