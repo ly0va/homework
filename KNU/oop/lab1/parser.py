@@ -1,118 +1,125 @@
 #!/usr/bin/python3
 
-tokens = (
+import ply.lex as lex
+import ply.yacc as yacc
+
+TOKEN_LIST = (
     'CELL', 'NUMBER',
     'PLUS', 'MINUS', 'TIMES', 'DIVIDE', 'MODULO',
     'EQUALS', 'LESS', 'GREATER', 'LTEQ', 'GTEQ',
     'LPAREN', 'RPAREN',
 )
 
-# Tokens
+class Lexer:
+    tokens = TOKEN_LIST
 
-t_PLUS    = r'\+'
-t_MINUS   = r'-'
-t_TIMES   = r'\*'
-t_DIVIDE  = r'/'
-t_MODULO  = r'%'
-t_LTEQ    = r'<='
-t_GTEQ    = r'>='
-t_LESS    = r'<'
-t_GREATER = r'>'
-t_EQUALS  = r'='
-t_LPAREN  = r'\('
-t_RPAREN  = r'\)'
-t_CELL    = r'[A-Z][0-9]+'
+    # Tokens
+    t_PLUS    = r'\+'
+    t_MINUS   = r'-'
+    t_TIMES   = r'\*'
+    t_DIVIDE  = r'/'
+    t_MODULO  = r'%'
+    t_LTEQ    = r'<='
+    t_GTEQ    = r'>='
+    t_LESS    = r'<'
+    t_GREATER = r'>'
+    t_EQUALS  = r'='
+    t_LPAREN  = r'\('
+    t_RPAREN  = r'\)'
+    t_CELL    = r'[A-Z][0-9]+'
+    # Ignored characters
+    t_ignore = " \t"
 
-def t_NUMBER(t):
-    r'\d+'
-    t.value = int(t.value)
-    return t
+    @staticmethod
+    def t_NUMBER(token):
+        r'\d+'
+        token.value = int(token.value)
+        return token
 
-# Ignored characters
-t_ignore = " \t"
+    @staticmethod
+    def t_error(token):
+        raise SyntaxError('Illegal character')
 
-def t_error(t):
-    print(f"Illegal character {t.value[0]!r}")
-    t.lexer.skip(1)
+    @staticmethod
+    def build(**kwargs):
+        return lex.lex(module=Lexer, **kwargs)
 
-# Build the lexer
-import ply.lex as lex
-lex.lex()
 
-# Precedence rules for the arithmetic operators
-precedence = (
-    ('left','EQUALS', 'LESS', 'GREATER', 'LTEQ', 'GTEQ'),
-    ('left','PLUS','MINUS'),
-    ('left','TIMES','DIVIDE', 'MODULO'),
-    ('right','UMINUS', 'UPLUS'),
-)
 
-# dictionary of names (for storing variables)
-names = {
-    'A1': 1,
-    'A2': 2,
-    'B4': 5
-}
+class Parser:
+    tokens = TOKEN_LIST
 
-def p_statement_expr(p):
-    'statement : expression'
-    print(p[1])
+    # Precedence rules for the arithmetic operators
+    precedence = (
+        ('left','EQUALS', 'LESS', 'GREATER', 'LTEQ', 'GTEQ'),
+        ('left','PLUS','MINUS'),
+        ('left','TIMES','DIVIDE', 'MODULO'),
+        ('right','UMINUS', 'UPLUS'),
+    )
 
-def p_expression_binop(p):
-    '''
-    expression : expression PLUS expression
-               | expression MINUS expression
-               | expression TIMES expression
-               | expression DIVIDE expression
-               | expression MODULO expression
-               | expression EQUALS expression
-               | expression LESS expression
-               | expression GREATER expression
-               | expression LTEQ expression
-               | expression GTEQ expression
-    '''
-    if p[2] == '+'  : p[0] = p[1] + p[3]
-    elif p[2] == '-': p[0] = p[1] - p[3]
-    elif p[2] == '*': p[0] = p[1] * p[3]
-    elif p[2] == '/': p[0] = p[1] / p[3]
-    elif p[2] == '%': p[0] = p[1] % p[3]
-    elif p[2] == '=': p[0] = int(p[1] == p[3])
-    elif p[2] == '<': p[0] = int(p[1] < p[3])
-    elif p[2] == '>': p[0] = int(p[1] > p[3])
-    elif p[2] == '<=': p[0] = int(p[1] <= p[3])
-    elif p[2] == '>=': p[0] = int(p[1] >= p[3])
+    def p_expression_binop(self, p):
+        '''
+        expression : expression PLUS expression
+                   | expression MINUS expression
+                   | expression TIMES expression
+                   | expression DIVIDE expression
+                   | expression MODULO expression
+                   | expression EQUALS expression
+                   | expression LESS expression
+                   | expression GREATER expression
+                   | expression LTEQ expression
+                   | expression GTEQ expression
+        '''
+        if p[2] == '+'  : p[0] = p[1] + p[3]
+        elif p[2] == '-': p[0] = p[1] - p[3]
+        elif p[2] == '*': p[0] = p[1] * p[3]
+        elif p[2] == '/': p[0] = p[1] / p[3]
+        elif p[2] == '%': p[0] = p[1] % p[3]
+        elif p[2] == '=': p[0] = int(p[1] == p[3])
+        elif p[2] == '<': p[0] = int(p[1] < p[3])
+        elif p[2] == '>': p[0] = int(p[1] > p[3])
+        elif p[2] == '<=': p[0] = int(p[1] <= p[3])
+        elif p[2] == '>=': p[0] = int(p[1] >= p[3])
 
-def p_expression_uminus(p):
-    'expression : MINUS expression %prec UMINUS'
-    p[0] = -p[2]
+    def p_expression_uminus(self, p):
+        'expression : MINUS expression %prec UMINUS'
+        p[0] = -p[2]
 
-def p_expression_uplus(p):
-    'expression : PLUS expression %prec UPLUS'
-    p[0] = +p[2]
+    def p_expression_uplus(self, p):
+        'expression : PLUS expression %prec UPLUS'
+        p[0] = +p[2]
 
-def p_expression_group(p):
-    'expression : LPAREN expression RPAREN'
-    p[0] = p[2]
+    def p_expression_group(self, p):
+        'expression : LPAREN expression RPAREN'
+        p[0] = p[2]
 
-def p_expression_number(p):
-    'expression : NUMBER'
-    p[0] = p[1]
+    def p_expression_number(self, p):
+        'expression : NUMBER'
+        p[0] = p[1]
 
-def p_expression_cell(p):
-    'expression : CELL'
-    p[0] = names.get(p[1], 0)
+    def p_expression_cell(self, p):
+        'expression : CELL'
+        p[0] = self.cells.get(p[1], 0)
 
-def p_error(p):
-    print(f"Syntax error at {p.value!r}")
+    def p_error(self, p):
+        raise SyntaxError('Invalid syntax')
 
-import ply.yacc as yacc
-yacc.yacc()
+    def __init__(self, lexer):
+        self.parser = yacc.yacc(module=self)
+        self.lexer = lexer
+        self.cells = {}
 
-while True:
-    try:
-        s = input('> ')
-    except EOFError:
-        break
-    yacc.parse(s)
+    def parse(self, text):
+        return self.parser.parse(text, lexer=self.lexer)
 
+
+if __name__ == '__main__':
+    lexer = Lexer.build()
+    parser = Parser(lexer)
+    while True:
+        try:
+            text = input('> ')
+        except EOFError:
+            break
+        print(parser.parse(text))
 
