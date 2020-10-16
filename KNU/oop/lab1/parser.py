@@ -4,7 +4,7 @@ import ply.lex as lex
 import ply.yacc as yacc
 
 TOKEN_LIST = (
-    'CELL', 'NUMBER',
+    'NUMBER',
     'PLUS', 'MINUS', 'TIMES', 'DIVIDE', 'MODULO',
     'EQUALS', 'LESS', 'GREATER', 'LTEQ', 'GTEQ',
     'LPAREN', 'RPAREN',
@@ -26,7 +26,6 @@ class Lexer:
     t_EQUALS  = r'='
     t_LPAREN  = r'\('
     t_RPAREN  = r'\)'
-    t_CELL    = r'[A-Z][0-9]+'
     # Ignored characters
     t_ignore = " \t"
 
@@ -97,17 +96,12 @@ class Parser:
         'expression : NUMBER'
         p[0] = p[1]
 
-    def p_expression_cell(self, p):
-        'expression : CELL'
-        p[0] = self.cells.get(p[1], 0)
-
     def p_error(self, p):
         raise SyntaxError('Invalid syntax')
 
     def __init__(self, lexer):
         self.parser = yacc.yacc(module=self)
         self.lexer = lexer
-        self.cells = {}
 
     def parse(self, text):
         return self.parser.parse(text, lexer=self.lexer)
