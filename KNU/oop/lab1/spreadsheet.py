@@ -12,31 +12,37 @@ CELL_REGEXP = r'[A-Z][0-9]+'
 class Spreadsheet(gtk.Window):
 
     def __init__(self, cols, rows):
-        super().__init__()
+        super().__init__(title="Lyova's Spreadsheet")
         lexer = Lexer.build()
         self.parser = Parser(lexer)
         self.cols = cols
         self.rows = rows
         self.formulas = [['0'] * cols for _ in range(rows)]
+        self.init_widgets()
+        self.add_table()
+
+    def init_widgets(self):
         self.set_default_size(600, 600)
         self.connect('destroy', gtk.main_quit)
-        self.set_title("Lyova's Spreadsheet")
         self.set_border_width(8)
+        self.window = gtk.ScrolledWindow()
+        self.window.set_policy(gtk.PolicyType.NEVER, gtk.PolicyType.AUTOMATIC)
+        self.treeview = gtk.TreeView()
+        self.window.add(self.treeview)
+        self.entry = gtk.Entry()
         vbox = gtk.VBox(homogeneous=False, spacing=8)
+        vbox.pack_start(self.entry, False, False, 0)
+        vbox.pack_start(self.window, True, True, 0)
         self.add(vbox)
-        label = gtk.Label(label='Nice to see you here')
-        vbox.pack_start(label, False, False, 0)
-        sw = gtk.ScrolledWindow()
-        sw.set_policy(gtk.PolicyType.NEVER, gtk.PolicyType.AUTOMATIC)
-        vbox.pack_start(sw, True, True, 0)
 
+    def add_table(self):
         types = [str] * (self.cols + 1)
         self.values = gtk.ListStore(*types)
+        spaces = [' '] * self.cols
         for i in range(self.rows):
-            self.values.append([' '] * self.cols + [f'<b>{i}</b>'])
+            self.values.append(spaces.copy() + [f'<b>{i}</b>'])
 
-        self.treeview = gtk.TreeView(model=self.values)
-        sw.add(self.treeview)
+        self.treeview.set_model(self.values)
 
         for i in range(self.cols):
             cell = gtk.CellRendererText()
@@ -54,13 +60,18 @@ class Spreadsheet(gtk.Window):
         self.treeview.set_grid_lines(3)
 
     def update(self, cell, row, text):
+        row, col = int(row), cell.column
+        old_formula = self.formulas[row][col]
+        self.formulas[row][col] = text
         try:
             parsed = self.parser.parse(self.expand(text))
+            self.values[str(row)][col] = str(parsed)
         except RecursionError:
-            print("Cycle detected!")
-        else:
-            self.formulas[int(row)][cell.column] = text
-            self.values[row][cell.column] = str(parsed)
+            self.error("Cycle detected!")
+            self.formulas[row][col] = old_formula
+        except SyntaxError as error:
+            self.error(error.args[0])
+            self.formulas[row][col] = old_formula
 
     def expand(self, formula):
         def replacer(match):
@@ -72,9 +83,30 @@ class Spreadsheet(gtk.Window):
             return formula
         return self.expand(re.sub(CELL_REGEXP, replacer, formula))
 
+    def about(self):
+        dialog = gtk.MessageDialog(
+            transient_for=self,
+            message_type=gtk.MessageType.INFO,
+            buttons=gtk.ButtonsType.OK,
+            text="Lyova's Spreadsheet v0.1.0",
+        )
+        dialog.format_secondary_text("Lab 1. Ticket 20. Lev Potyomkin, K-27")
+        dialog.run()
+        dialog.destroy()
 
-manager = Spreadsheet(26, 30)
-manager.show_all()
+    def error(self, message):
+        dialog = gtk.MessageDialog(
+            transient_for=self,
+            message_type=gtk.MessageType.ERROR,
+            buttons=gtk.ButtonsType.CANCEL,
+            text=message,
+        )
+        dialog.run()
+        dialog.destroy()
+
+
+spreadsheet = Spreadsheet(26, 30)
+spreadsheet.show_all()
 gtk.main()
 
 

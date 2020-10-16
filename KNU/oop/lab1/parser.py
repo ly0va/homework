@@ -39,9 +39,9 @@ class Lexer:
     def t_error(token):
         raise SyntaxError('Illegal character')
 
-    @staticmethod
-    def build(**kwargs):
-        return lex.lex(module=Lexer, **kwargs)
+    @classmethod
+    def build(cls):
+        return lex.lex(module=cls)
 
 
 
@@ -104,6 +104,8 @@ class Parser:
         self.lexer = lexer
 
     def parse(self, text):
+        if text.strip() == '':
+            return 0
         return self.parser.parse(text, lexer=self.lexer)
 
 
