@@ -5,6 +5,7 @@ gi.require_version('Gtk', '3.0')
 gi.require_version('Gdk', '3.0')
 
 from gi.repository import Gtk as gtk, Gdk as gdk
+from parser import Lexer, Parser
 
 
 class Table(gtk.Window):
@@ -26,25 +27,31 @@ class Table(gtk.Window):
         sw.set_policy(gtk.PolicyType.NEVER, gtk.PolicyType.AUTOMATIC)
         vbox.pack_start(sw, True, True, 0)
 
-        types = [str] * self.cols
-        self.liststore = gtk.ListStore(*types)
-        for _ in range(self.rows):
-            self.liststore.append(['0'] * self.cols)
+        types = [str] * (self.cols + 1)
+        self.values = gtk.ListStore(*types)
+        for i in range(self.rows):
+            self.values.append([' '] * self.cols + [f'<b>{i}</b>'])
 
-        self.treeview = gtk.TreeView(model=self.liststore)
+        self.treeview = gtk.TreeView(model=self.values)
         sw.add(self.treeview)
 
         for i in range(self.cols):
-            renderer = gtk.CellRendererText()
-            renderer.set_property("editable", True)
-            renderer.connect("edited", self.update)
-            renderer.column = i
-            column = gtk.TreeViewColumn(chr(ord('A')+i), renderer, text=i)
+            cell = gtk.CellRendererText()
+            cell.set_property("editable", True)
+            cell.connect("edited", self.update)
+            cell.column = i
+            column = gtk.TreeViewColumn(chr(ord('A')+i), cell, text=i)
             self.treeview.append_column(column)
 
-    def update(self, cell, row, text):
-        self.liststore[row][cell.column] = text
+        cell = gtk.CellRendererText()
+        cell.set_sensitive(False)
+        column = gtk.TreeViewColumn('#', cell, markup=self.cols)
+        self.treeview.insert_column(column, 0)
 
+        self.treeview.set_grid_lines(3)
+
+    def update(self, cell, row, text):
+        self.values[row][cell.column] = text
 
 
 manager = Table(26, 30)
