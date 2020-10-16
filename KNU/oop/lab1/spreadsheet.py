@@ -31,6 +31,7 @@ class Spreadsheet(gtk.Window):
         self.treeview = gtk.TreeView()
         self.window.add(self.treeview)
         self.entry = gtk.Entry()
+        self.entry.connect("activate", self.entry_hook)
         vbox = gtk.VBox(homogeneous=False, spacing=8)
         vbox.pack_start(self.create_toolbar(), False, False, 0)
         vbox.pack_start(self.entry, False, False, 0)
@@ -95,6 +96,16 @@ class Spreadsheet(gtk.Window):
             self.error(error.args[0])
             self.formulas[row][col] = old_formula
                 
+    def cursor_hook(self, treeview):
+        cursor = treeview.get_cursor()
+        row, col = int(str(cursor[0])), cursor[1].index
+        self.entry.set_text(self.formulas[row][col])
+
+    def entry_hook(self, entry):
+        cursor = self.treeview.get_cursor()
+        row, col = int(str(cursor[0])), cursor[1].index
+        self.parse(row, col, entry.get_text())
+        self.recalculate()
 
     def add_table(self):
         types = [str] * (self.cols + 1)
@@ -104,14 +115,15 @@ class Spreadsheet(gtk.Window):
             self.values.append(spaces.copy() + [f'<b>{i}</b>'])
 
         self.treeview.set_model(self.values)
+        self.treeview.connect("cursor-changed", self.cursor_hook)
 
         for i in range(self.cols):
             cell = gtk.CellRendererText()
             cell.set_property("editable", True)
             cell.connect("edited", self.update)
-            cell.column = i
             header = chr(ord('A')+i)+' '*5
             column = gtk.TreeViewColumn(header, cell, text=i)
+            cell.index = column.index = i
             self.treeview.append_column(column)
 
         cell = gtk.CellRendererText()
@@ -121,9 +133,10 @@ class Spreadsheet(gtk.Window):
         self.treeview.set_grid_lines(3)
 
     def update(self, cell, row, text):
-        row, col = int(row), cell.column
+        row, col = int(row), cell.index
         self.parse(row, col, text)
         self.recalculate()
+        self.entry.set_text(text)
 
     def expand(self, formula):
         def replacer(match):
@@ -157,8 +170,8 @@ class Spreadsheet(gtk.Window):
         dialog.destroy()
 
 
-spreadsheet = Spreadsheet(26, 30)
-spreadsheet.show_all()
-gtk.main()
-
+if __name__ == '__main__':
+    spreadsheet = Spreadsheet(26, 30)
+    spreadsheet.show_all()
+    gtk.main()
 
