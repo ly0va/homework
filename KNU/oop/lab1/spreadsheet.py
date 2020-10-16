@@ -89,13 +89,17 @@ class Spreadsheet(gtk.Window):
         try:
             parsed = self.parser.parse(self.expand(text))
             self.values[str(row)][col] = str(parsed)
+            return True
         except RecursionError:
             self.error("Cycle detected!")
             self.formulas[row][col] = old_formula
-        except SyntaxError as error:
+        except ZeroDivisionError:
+            self.error("Can't divide by zero!")
+            self.formulas[row][col] = old_formula
+        except Exception as error:
             self.error(error.args[0])
             self.formulas[row][col] = old_formula
-                
+
     def cursor_hook(self, treeview):
         cursor = treeview.get_cursor()
         row, col = int(str(cursor[0])), cursor[1].index
@@ -134,9 +138,9 @@ class Spreadsheet(gtk.Window):
 
     def update(self, cell, row, text):
         row, col = int(row), cell.index
-        self.parse(row, col, text)
-        self.recalculate()
-        self.entry.set_text(text)
+        if self.parse(row, col, text):
+            self.recalculate()
+            self.entry.set_text(text)
 
     def expand(self, formula):
         def replacer(match):
