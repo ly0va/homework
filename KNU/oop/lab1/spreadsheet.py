@@ -8,7 +8,6 @@ gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk as gtk
 from parser import Lexer, Parser
 
-CELL_REGEXP = r'[A-Z][0-9]+'
 
 class Spreadsheet(gtk.Window):
 
@@ -148,6 +147,7 @@ class Spreadsheet(gtk.Window):
             col, row = ord(name[0]) - ord('A'), int(name[1:])
             return f'({self.formulas[row][col] or "0"})'
 
+        CELL_REGEXP = r'[A-Z][0-9]+'
         if not re.search(CELL_REGEXP, formula):
             return formula
         return self.expand(re.sub(CELL_REGEXP, replacer, formula))
