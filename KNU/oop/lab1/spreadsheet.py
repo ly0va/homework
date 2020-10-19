@@ -8,6 +8,8 @@ gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk as gtk
 from parser import Lexer, Parser
 
+COLUMNS = 26
+ROWS    = 30
 
 class Spreadsheet(gtk.Window):
 
@@ -79,7 +81,7 @@ class Spreadsheet(gtk.Window):
                 self.parse(i, j, self.formulas[i][j])
 
     def parse(self, row, col, text):
-        if text == '':
+        if text.strip() == '':
             self.formulas[row][col] = ''
             self.values[str(row)][col] = ''
             return
@@ -175,7 +177,7 @@ class Spreadsheet(gtk.Window):
 
 
 if __name__ == '__main__':
-    spreadsheet = Spreadsheet(26, 30)
+    spreadsheet = Spreadsheet(COLUMNS, ROWS)
     spreadsheet.show_all()
     gtk.main()
 

@@ -5,8 +5,8 @@ import ply.yacc as yacc
 
 TOKEN_LIST = (
     'NUMBER',
-    'PLUS', 'MINUS', 'TIMES', 'DIVIDE', 'MODULO',
-    'EQUALS', 'LESS', 'GREATER', 'LTEQ', 'GTEQ',
+    'PLUS', 'MINUS', 'TIMES', 'DIVIDE', 'INTDIV', 'MODULO',
+    'EQUALS', 'NEQ', 'LESS', 'GREATER', 'LTEQ', 'GTEQ',
     'LPAREN', 'RPAREN',
 )
 
@@ -17,10 +17,12 @@ class Lexer:
     t_PLUS    = r'\+'
     t_MINUS   = r'-'
     t_TIMES   = r'\*'
-    t_DIVIDE  = r'/'
+    t_DIVIDE  = r':'
+    t_INTDIV  = r'/'
     t_MODULO  = r'%'
     t_LTEQ    = r'<='
     t_GTEQ    = r'>='
+    t_NEQ     = r'!='
     t_LESS    = r'<'
     t_GREATER = r'>'
     t_EQUALS  = r'='
@@ -50,10 +52,10 @@ class Parser:
 
     # Precedence rules for the arithmetic operators
     precedence = (
-        ('left','EQUALS', 'LESS', 'GREATER', 'LTEQ', 'GTEQ'),
-        ('left','PLUS','MINUS'),
-        ('left','TIMES','DIVIDE', 'MODULO'),
-        ('right','UMINUS', 'UPLUS'),
+        ('left', 'EQUALS', 'LESS', 'GREATER', 'LTEQ', 'GTEQ', 'NEQ'),
+        ('left', 'PLUS', 'MINUS'),
+        ('left', 'TIMES', 'DIVIDE', 'MODULO', 'INTDIV'),
+        ('right', 'UMINUS', 'UPLUS'),
     )
 
     def p_expression_binop(self, p):
@@ -62,8 +64,10 @@ class Parser:
                    | expression MINUS expression
                    | expression TIMES expression
                    | expression DIVIDE expression
+                   | expression INTDIV expression
                    | expression MODULO expression
                    | expression EQUALS expression
+                   | expression NEQ expression
                    | expression LESS expression
                    | expression GREATER expression
                    | expression LTEQ expression
@@ -72,9 +76,11 @@ class Parser:
         if p[2] == '+'  : p[0] = p[1] + p[3]
         elif p[2] == '-': p[0] = p[1] - p[3]
         elif p[2] == '*': p[0] = p[1] * p[3]
-        elif p[2] == '/': p[0] = p[1] / p[3]
+        elif p[2] == '/': p[0] = p[1] // p[3]
+        elif p[2] == ':': p[0] = p[1] / p[3]
         elif p[2] == '%': p[0] = p[1] % p[3]
         elif p[2] == '=': p[0] = int(p[1] == p[3])
+        elif p[2] == '!=': p[0] = int(p[1] != p[3])
         elif p[2] == '<': p[0] = int(p[1] < p[3])
         elif p[2] == '>': p[0] = int(p[1] > p[3])
         elif p[2] == '<=': p[0] = int(p[1] <= p[3])
