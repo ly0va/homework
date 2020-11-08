@@ -6,7 +6,7 @@ import webbrowser
 gi.require_version('Gtk', '3.0')
 
 from gi.repository import Gtk as gtk
-from strategy import DOMParser, SAXParser
+from strategy import *
 
 class UI(gtk.Window):
 
@@ -18,7 +18,7 @@ class UI(gtk.Window):
         self.init_widgets()
 
     def init_widgets(self):
-        self.set_default_size(1200, 600)
+        self.set_default_size(900, 600)
         self.connect('destroy', gtk.main_quit)
         panes = gtk.Box()
         panes.pack_start(self.left_pane(), True, True, 0)
@@ -29,43 +29,85 @@ class UI(gtk.Window):
         self.add(main)
 
     def left_pane(self):
-        controls = gtk.VBox()
-        controls.set_border_width(50)
-        # controls.pack_start(self.create_buttons(), False, False, 10)
-        dom_button, sax_button = self.create_radio()
-        controls.pack_start(dom_button, False, False, 10)
-        controls.pack_start(sax_button, False, False, 0)
-        controls.pack_end(self.create_buttons(), False, False, 10)
+        controls = gtk.VBox(spacing=10)
+        controls.set_margin_top(10)
+        controls.set_margin_start(50)
+        controls.set_margin_end(50)
+        controls.set_margin_bottom(50)
+        controls.add(self.create_label('Search Parameters'))
+        controls.add(self.create_dropdowns())
+        controls.add(self.create_label('Parser Type'))
+        controls.add(self.create_radio())
+        controls.add(self.create_label('Action'))
+        controls.add(self.create_buttons())
         return controls
 
+    def create_label(self, text):
+        label = gtk.Label()
+        label.set_markup(f'<b><big>{text}</big></b>')
+        return label
+
     def create_dropdowns(self):
-        pass
+        vbox = gtk.VBox(spacing=3)
+        cds = DOMParser().parse(self.xml)
+        self.dropdowns = {}
+        for field in FIELDS:
+            box = gtk.Box()
+            label = gtk.Label(label=field.capitalize())
+            dropdown = gtk.ComboBoxText()
+            dropdown.set_size_request(250, 0)
+            dropdown.append_text('')
+            for option in sorted(set(cd[field] for cd in cds)):
+                dropdown.append_text(option)
+            self.dropdowns[field] = dropdown
+            box.pack_start(label, False, False, 0)
+            box.pack_end(dropdown, False, False, 0)
+            vbox.add(box)
+        return vbox
 
     def create_radio(self):
+        box = gtk.Box(spacing=50)
         dom_button = gtk.RadioButton(label='DOM')
         sax_button = gtk.RadioButton(label='SAX')
         sax_button.join_group(dom_button)
         dom_button.connect('toggled', self.set_parser)
         sax_button.connect('toggled', self.set_parser)
-        return dom_button, sax_button
+        box.add(dom_button)
+        box.add(sax_button)
+        return box
 
     def create_buttons(self):
-        buttons = gtk.Box()
+        buttons = gtk.Box(spacing=10)
         search = gtk.Button(label='Search')
         search.connect('clicked', self.search)
         transform = gtk.Button(label='Transform')
         transform.connect('clicked', self.transform)
         buttons.pack_start(search, True, True, 0)
-        buttons.pack_start(transform, True, True, 10)
+        buttons.pack_start(transform, True, True, 0)
         return buttons
 
     def set_parser(self, widget, data=None):
         self.parser_type = widget.get_label()
-        print(self.parser_type)
+
+    def format_cd(self, cd, number):
+        text = f'\n--- CD #{number} ---\n'
+        for field in FIELDS:
+            text += f'{field.capitalize()}: {cd[field]}\n'
+        return text
 
     def search(self, widget, data=None):
         parser = DOMParser() if self.parser_type == 'DOM' else SAXParser()
-        print(parser.parse(self.xml))
+        cds = parser.parse(self.xml)
+        text = '*** Search Results ***\n'
+        for i, cd in enumerate(cds, 1):
+            include_cd = True
+            for field in FIELDS:
+                parameter = self.dropdowns[field].get_active_text()
+                if parameter and parameter != cd[field]:
+                    include_cd = False
+            if include_cd:
+                text += self.format_cd(cd, i)
+        self.set_text(text)
 
     def transform(self, widget, data=None):
         xml = etree.parse('./cdcatalog.xml')
@@ -79,7 +121,7 @@ class UI(gtk.Window):
 
     def right_pane(self):
         window = gtk.ScrolledWindow()
-        window.set_min_content_width(300)
+        window.set_min_content_width(400)
         self.text_view = gtk.TextView(
             editable=False,
             monospace=True,
