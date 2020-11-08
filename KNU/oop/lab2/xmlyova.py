@@ -6,6 +6,7 @@ import webbrowser
 gi.require_version('Gtk', '3.0')
 
 from gi.repository import Gtk as gtk
+from strategy import DOMParser, SAXParser
 
 class UI(gtk.Window):
 
@@ -30,19 +31,23 @@ class UI(gtk.Window):
     def left_pane(self):
         controls = gtk.VBox()
         controls.set_border_width(50)
-        dom, sax = self.create_radio()
-        controls.pack_start(dom, False, False, 10)
-        controls.pack_start(sax, False, False, 0)
+        # controls.pack_start(self.create_buttons(), False, False, 10)
+        dom_button, sax_button = self.create_radio()
+        controls.pack_start(dom_button, False, False, 10)
+        controls.pack_start(sax_button, False, False, 0)
         controls.pack_end(self.create_buttons(), False, False, 10)
         return controls
 
+    def create_dropdowns(self):
+        pass
+
     def create_radio(self):
-        dom = gtk.RadioButton(label='DOM')
-        sax = gtk.RadioButton(label='SAX')
-        sax.join_group(dom)
-        dom.connect('toggled', self.set_parser)
-        sax.connect('toggled', self.set_parser)
-        return dom, sax
+        dom_button = gtk.RadioButton(label='DOM')
+        sax_button = gtk.RadioButton(label='SAX')
+        sax_button.join_group(dom_button)
+        dom_button.connect('toggled', self.set_parser)
+        sax_button.connect('toggled', self.set_parser)
+        return dom_button, sax_button
 
     def create_buttons(self):
         buttons = gtk.Box()
@@ -59,12 +64,13 @@ class UI(gtk.Window):
         print(self.parser_type)
 
     def search(self, widget, data=None):
-        pass
+        parser = DOMParser() if self.parser_type == 'DOM' else SAXParser()
+        print(parser.parse(self.xml))
 
     def transform(self, widget, data=None):
         xml = etree.parse('./cdcatalog.xml')
-        xslt = etree.parse('./cdcatalog.xsl')
-        html = etree.XSLT(xslt)(xml)
+        xsl = etree.parse('./cdcatalog.xsl')
+        html = etree.XSLT(xsl)(xml)
         html_string = etree.tostring(html, pretty_print=True).decode()
         self.set_text(html_string)
         with open('./cdcatalog.html', 'w') as html_file:
@@ -74,16 +80,16 @@ class UI(gtk.Window):
     def right_pane(self):
         window = gtk.ScrolledWindow()
         window.set_min_content_width(300)
-        self.text_view = gtk.TextView()
-        self.text_view.set_editable(False)
-        self.text_view.set_cursor_visible(False)
-        self.text_view.set_monospace(True)
+        self.text_view = gtk.TextView(
+            editable=False,
+            monospace=True,
+            cursor_visible=False
+        )
         window.add(self.text_view)
         return window
 
     def set_text(self, text):
-        buffer = gtk.TextBuffer()
-        buffer.set_text(text)
+        buffer = gtk.TextBuffer(text=text)
         self.text_view.set_buffer(buffer)
 
     def create_toolbar(self):
