@@ -7,7 +7,8 @@ FIELDS = ['title', 'artist', 'country', 'company', 'price', 'year']
 MAIN_TAG = 'cd'
 
 class DOMParser:
-    def parse(self, xml):
+    @staticmethod
+    def parse(xml):
         dom_tree = dom.parseString(xml)
         collection = dom_tree.documentElement
         cds = []
@@ -42,7 +43,8 @@ class Handler(sax.ContentHandler):
             self.current_element[self.current_tag] = content
 
 class SAXParser:
-    def parse(self, xml):
+    @staticmethod
+    def parse(xml):
         handler = Handler()
         sax.parseString(xml, handler)
         return handler.elements

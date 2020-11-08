@@ -8,6 +8,18 @@ gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk as gtk
 from strategy import *
 
+## UI constants
+WINDOW_WIDTH = 900
+WINDOW_HEIGHT = 600
+CONTROLS_SPACING = 10
+CONTROLS_MARGIN = 50
+BUTTONS_SPACING = 10
+RADIO_SPACING = 50
+DROPDOWNS_SPACING = 3
+DROPDOWNS_WIDTH = 250
+TEXTAREA_WIDTH = 400
+FILENAME = 'cdcatalog'
+
 class UI(gtk.Window):
 
     def __init__(self, filename):
@@ -15,10 +27,11 @@ class UI(gtk.Window):
         with open(filename) as xml:
             self.xml = xml.read()
         self.parser_type = 'DOM'
+        self.dropdowns = {}
         self.init_widgets()
 
     def init_widgets(self):
-        self.set_default_size(900, 600)
+        self.set_default_size(WINDOW_WIDTH, WINDOW_HEIGHT)
         self.connect('destroy', gtk.main_quit)
         panes = gtk.Box()
         panes.pack_start(self.left_pane(), True, True, 0)
@@ -29,11 +42,10 @@ class UI(gtk.Window):
         self.add(main)
 
     def left_pane(self):
-        controls = gtk.VBox(spacing=10)
-        controls.set_margin_top(10)
-        controls.set_margin_start(50)
-        controls.set_margin_end(50)
-        controls.set_margin_bottom(50)
+        controls = gtk.VBox(spacing=CONTROLS_SPACING)
+        controls.set_margin_start(CONTROLS_MARGIN)
+        controls.set_margin_end(CONTROLS_MARGIN)
+        controls.set_margin_bottom(CONTROLS_MARGIN)
         controls.add(self.create_label('Search Parameters'))
         controls.add(self.create_dropdowns())
         controls.add(self.create_label('Parser Type'))
@@ -48,14 +60,17 @@ class UI(gtk.Window):
         return label
 
     def create_dropdowns(self):
-        vbox = gtk.VBox(spacing=3)
-        cds = DOMParser().parse(self.xml)
-        self.dropdowns = {}
+        vbox = gtk.VBox(spacing=DROPDOWNS_SPACING)
+        try:
+            cds = DOMParser.parse(self.xml)
+        except Exception:
+            self.error('Invalid format of the XML document')
+            gtk.main_quit()
         for field in FIELDS:
             box = gtk.Box()
             label = gtk.Label(label=field.capitalize())
             dropdown = gtk.ComboBoxText()
-            dropdown.set_size_request(250, 0)
+            dropdown.set_size_request(DROPDOWNS_WIDTH, 0)
             dropdown.append_text('')
             for option in sorted(set(cd[field] for cd in cds)):
                 dropdown.append_text(option)
@@ -66,7 +81,7 @@ class UI(gtk.Window):
         return vbox
 
     def create_radio(self):
-        box = gtk.Box(spacing=50)
+        box = gtk.Box(spacing=RADIO_SPACING)
         dom_button = gtk.RadioButton(label='DOM')
         sax_button = gtk.RadioButton(label='SAX')
         sax_button.join_group(dom_button)
@@ -77,7 +92,7 @@ class UI(gtk.Window):
         return box
 
     def create_buttons(self):
-        buttons = gtk.Box(spacing=10)
+        buttons = gtk.Box(spacing=BUTTONS_SPACING)
         search = gtk.Button(label='Search')
         search.connect('clicked', self.search)
         transform = gtk.Button(label='Transform')
@@ -110,18 +125,18 @@ class UI(gtk.Window):
         self.set_text(text)
 
     def transform(self, widget, data=None):
-        xml = etree.parse('./cdcatalog.xml')
-        xsl = etree.parse('./cdcatalog.xsl')
+        xml = etree.fromstring(self.xml.encode())
+        xsl = etree.parse(f'./{FILENAME}.xsl')
         html = etree.XSLT(xsl)(xml)
         html_string = etree.tostring(html, pretty_print=True).decode()
         self.set_text(html_string)
-        with open('./cdcatalog.html', 'w') as html_file:
+        with open(f'./{FILENAME}.html', 'w') as html_file:
             html_file.write(html_string)
-        webbrowser.open_new_tab("./cdcatalog.html")
+        webbrowser.open_new_tab(f"./{FILENAME}.html")
 
     def right_pane(self):
         window = gtk.ScrolledWindow()
-        window.set_min_content_width(400)
+        window.set_min_content_width(TEXTAREA_WIDTH)
         self.text_view = gtk.TextView(
             editable=False,
             monospace=True,
@@ -182,7 +197,7 @@ class UI(gtk.Window):
 
 
 if __name__ == '__main__':
-    ui = UI('./cdcatalog.xml')
+    ui = UI(f'./{FILENAME}.xml')
     ui.show_all()
     gtk.main()
 

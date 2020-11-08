@@ -6,18 +6,23 @@ from sympy import Matrix
 ##### (Already in standard form) #####
 
 A = Matrix([
-    [2,  3, 1, 0,  0],
-    [3, -5, 0, 1,  0],
-    [5,  3, 0, 0, -1],
+    [-1,  2, 1, 0,  0],
+    [2,  -1, 0, 1,  0],
+    [1,   1, 0, 0, -1],
 ])
 
-b = Matrix([19, 17, 17])
+b = Matrix([6, 8, 2])
 
-c = Matrix([-5, -1, 0, 0, 0])
+c = Matrix([1, 4, 0, 0, 0])
 
 ######################################
 
 def simplex_method(A, b, c, basis):
+    print('step')
+    print(A)
+    print(b)
+    print(c)
+    print(basis)
     m, n = A.shape
 
     # compute delta_k
@@ -25,6 +30,8 @@ def simplex_method(A, b, c, basis):
         c[j] - sum(c[basis[i]]*A[i, j] for i in range(m))
         for j in range(n)
     ]
+
+    print('deltas', deltas)
 
     # check if optimal vertex is reached
     if all(delta >= 0 for delta in deltas):
@@ -43,6 +50,8 @@ def simplex_method(A, b, c, basis):
         b[i]/A[i, k] if A[i, k] > 0 else float('inf')
         for i in range(m)
     ]
+
+    print('thetas', thetas)
 
     l = thetas.index(min(thetas))  # determine out_index
     basis[l] = k                   # change basis
