@@ -62,7 +62,7 @@ class UI(gtk.Window):
     def create_dropdowns(self):
         vbox = gtk.VBox(spacing=DROPDOWNS_SPACING)
         try:
-            cds = DOMParser.parse(self.xml)
+            cds = DOMParser(self.xml).parse({})
         except Exception:
             self.error('Invalid format of the XML document')
             gtk.main_quit()
@@ -111,17 +111,14 @@ class UI(gtk.Window):
         return text
 
     def search(self, widget, data=None):
-        parser = DOMParser() if self.parser_type == 'DOM' else SAXParser()
-        cds = parser.parse(self.xml)
-        text = '*** Search Results ***\n'
-        for i, cd in enumerate(cds, 1):
-            include_cd = True
-            for field in FIELDS:
-                parameter = self.dropdowns[field].get_active_text()
-                if parameter and parameter != cd[field]:
-                    include_cd = False
-            if include_cd:
-                text += self.format_cd(cd, i)
+        parser = DOMParser(self.xml) \
+            if self.parser_type == 'DOM' \
+            else SAXParser(self.xml)
+        params = {field: dropdown.get_active_text()
+                  for field, dropdown in self.dropdowns.items()}
+        cds = parser.parse(params)
+        text = '*** Search Results ***\n' + \
+            ''.join(self.format_cd(cd, i) for i, cd in enumerate(cds, 1))
         self.set_text(text)
 
     def transform(self, widget, data=None):
@@ -157,7 +154,7 @@ class UI(gtk.Window):
         toolbar.insert(info, 1)
         quit.connect("clicked", lambda _: self.confirm_exit())
         info.connect("clicked", lambda _: self.info(
-            "XMLyova v0.1.0", 
+            "XMLyova v0.1.0",
             "Lab 2, Lev Potyomkin, K-27"
         ))
         return toolbar

@@ -7,45 +7,57 @@ FIELDS = ['title', 'artist', 'country', 'company', 'price', 'year']
 MAIN_TAG = 'cd'
 
 class DOMParser:
-    @staticmethod
-    def parse(xml):
-        dom_tree = dom.parseString(xml)
-        collection = dom_tree.documentElement
+    def __init__(self, xml):
+        self.collection = dom.parseString(xml).documentElement
+
+    def parse(self, params):
         cds = []
-        for node in collection.getElementsByTagName(MAIN_TAG):
+        for node in self.collection.getElementsByTagName(MAIN_TAG):
             cd = {}
+            approved = True
             for field in FIELDS:
                 element = node.getElementsByTagName(field)[0]
                 cd[field] = element.childNodes[0].data
-            cds.append(cd)
+                if params.get(field) and params[field] != cd[field]:
+                    approved = False
+            if approved:
+                cds.append(cd)
         return cds
 
 
 class Handler(sax.ContentHandler):
-    def __init__(self):
+    def __init__(self, params):
+        self.params = params
         self.current_tag = ""
-        self.current_element = {}
-        self.elements = []
+        self.current_cd = {}
+        self.current_approved = True
+        self.cds = []
 
     def startElement(self, tag, attributes):
         self.current_tag = tag
-        if tag == MAIN_TAG:
-            self.current_element.update(attributes)
 
     def endElement(self, tag):
         if tag == MAIN_TAG:
-            self.elements.append(self.current_element)
-            self.current_element = {}
+            if self.current_approved:
+                self.cds.append(self.current_cd)
+            self.current_cd = {}
+            self.current_approved = True
         self.current_tag = ""
 
     def characters(self, content):
         if self.current_tag in FIELDS:
-            self.current_element[self.current_tag] = content
+            self.current_cd[self.current_tag] = content
+            field = self.current_tag
+            if self.params.get(field) and self.params[field] != self.current_cd[field]:
+                self.current_approved = False
+
 
 class SAXParser:
-    @staticmethod
-    def parse(xml):
-        handler = Handler()
-        sax.parseString(xml, handler)
-        return handler.elements
+    def __init__(self, xml):
+        self.xml = xml
+
+    def parse(self, params):
+        handler = Handler(params)
+        sax.parseString(self.xml, handler)
+        return handler.cds
 
