@@ -29,6 +29,8 @@ class UI(gtk.Window):
         self.parser_type = 'DOM'
         self.dropdowns = {}
         self.init_widgets()
+        self.dom_parser = DOMParser(self.xml)
+        self.sax_parser = SAXParser(self.xml)
 
     def init_widgets(self):
         self.set_default_size(WINDOW_WIDTH, WINDOW_HEIGHT)
@@ -111,9 +113,9 @@ class UI(gtk.Window):
         return text
 
     def search(self, widget, data=None):
-        parser = DOMParser(self.xml) \
+        parser = self.dom_parser \
             if self.parser_type == 'DOM' \
-            else SAXParser(self.xml)
+            else self.sax_parser
         params = {field: dropdown.get_active_text()
                   for field, dropdown in self.dropdowns.items()}
         cds = parser.parse(params)
