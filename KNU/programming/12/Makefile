@@ -7,7 +7,7 @@ all : $(BINARIES)
 
 libs : $(LIBS)
 
-spectre_demo : spectre_demo.cpp demo.o liboutput.a libspectre.a
+spectre_demo : spectre_demo.cpp demo.o $(LIBS)
 	g++ -o $@ $^
 
 demo.o : demo.cpp demo.hpp
@@ -28,8 +28,8 @@ liboutput.o : liboutput.cpp liboutput.hpp
 liboutput.a : liboutput.o
 	ar rcs $@ $<
 
-spectre_output : spectre_output.cpp liboutput.a libspectre.a
+spectre_output : spectre_output.cpp $(LIBS)
 	g++ -o $@ $^
 
-clean : 
+clean :
 	rm -f *.o *.html $(LIBS) $(BINARIES)
