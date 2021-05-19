@@ -1,0 +1,23 @@
+{% extends 'products/base.html' %}
+
+{% block content %}
+    <h1 class="my-4">Detail -
+        <small>{{ object.name }}</small>
+    </h1>
+    <div class="row">
+        <div class="col-12">
+            <ul class="list-group">
+              <li class="list-group-item"><strong>Account:</strong> {{ object.account.name }}</li>
+              <li class="list-group-item"><strong>Category:</strong> {{ object.category.name }}</li>
+              <li class="list-group-item"><strong>Amount:</strong> {{ object.amount }}</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="row top-buffer">
+        <div class="col-12">
+                <a href="{% url 'income_edit' object.id %}"><button type="button" class="btn btn-success">Edit</button></a>
+                <a href="{% url 'income_list' %}"><button type="button" class="btn btn-secondary">Back</button></a>
+        </div>
+    </div>
+{% endblock %}

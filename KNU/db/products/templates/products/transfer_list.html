@@ -1,0 +1,55 @@
+{% extends 'products/base.html' %}
+
+{% block content %}
+    <h1 class="my-4">
+        <small>Transfer List</small>
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+              <a class="btn btn-outline-info btn-md" href="{% url 'transfer_new' %}">+ New</a>
+            </li>
+          </ul>
+    </h1>
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-success" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+    <div class="row">
+    {% if object_list %}
+        <div class="col-12" style="overflow-x: scroll">
+            <table class="table">
+              <thead class="thead-dark">
+                <tr>
+                    <th scope="col">Account from</th>
+                    <th scope="col">Account to</th>
+                    <th scope="col">Amount from</th>
+                    <th scope="col">Amount to</th>
+                    <th scope="col">View</th>
+                    <th scope="col">Delete</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for transfer in object_list %}
+                <tr>
+                    <td>{{ transfer.from_account.name }}</td>
+                    <td>{{ transfer.to_account.name }}</td>
+                    <td>{{ transfer.from_amount }}</td>
+                    <td>{{ transfer.to_amount }}</td>
+                    <td><a href="{% url 'transfer_view' transfer.id %}"><button type="button" class="btn btn-outline-primary btn-sm">View</button></a></td>
+                    <td><a href="{% url 'transfer_delete' transfer.id %}"><button type="button" class="btn btn-outline-danger btn-sm">Delete</button></a></td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+        </div>
+    {% else %}
+    <div class="col-12">
+        <div class="alert alert-warning" role="alert">
+            There is no transfer, yet.
+        </div>
+    </div>
+    {% endif %}
+    </div>
+{% endblock %}

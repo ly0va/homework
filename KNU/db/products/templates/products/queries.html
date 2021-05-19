@@ -1,0 +1,88 @@
+{% extends 'products/base.html' %}
+
+{% block content %}
+    <h1 class="my-4"> Queries
+    </h1>
+
+    <h5>
+        Знайти максимальний платіж за категорією Х.
+    </h5>
+    <form action="/queries" method="post">
+        {% csrf_token %}
+        {{ form1 }}
+        <input type="submit" value="Submit">
+    </form>
+
+    <h5>
+        Знайти назви всіх рахунків, на яких лежить валюта з символом Х.
+    </h5>
+    <form action="/queries" method="post">
+        {% csrf_token %}
+        {{ form2 }}
+        <input type="submit" value="Submit">
+    </form>
+
+    <h5>
+        Знайти назви всіх рахунків, сумарний дохід на яких більше ніж Х одиниць.
+    </h5>
+    <form action="/queries" method="post">
+        {% csrf_token %}
+        {{ form3 }}
+        <input type="submit" value="Submit">
+    </form>
+
+    <h5>
+         Знайти символи валют, що зберігаються на рахунках, середні вихідні платежі яких менше за Х.
+    </h5>
+    <form action="/queries" method="post">
+        {% csrf_token %}
+        {{ form4 }}
+        <input type="submit" value="Submit">
+    </form>
+
+    <h5>
+        Знайти категорії, за якими були платежі у X або більше рахунків.
+    </h5>
+    <form action="/queries" method="post">
+        {% csrf_token %}
+        {{ form5 }}
+        <input type="submit" value="Submit">
+    </form>
+
+    <h5>
+        Знайти назви рахунків, у яких були платежі тільки за тими категоріями, що і у рахунку з id Х (можливо не всіма).
+    </h5>
+    <form action="/queries" method="post">
+        {% csrf_token %}
+        {{ form6 }}
+        <input type="submit" value="Submit">
+    </form>
+
+    <h5>
+        Знайти акаунти, в які є трансфери з щонайменше Х акаунтів з валютою Y.
+    </h5>
+    <form action="/queries" method="post">
+        {% csrf_token %}
+        {{ form7 }}
+        <input type="submit" value="Submit">
+    </form>
+
+    <h5>
+        Знайти категорії, в яких платежі в тій самій валюті що й аккаунт Х і ще якiйсь.
+    </h5>
+    <form action="/queries" method="post">
+        {% csrf_token %}
+        {{ form8 }}
+        <input type="submit" value="Submit">
+    </form>
+    <hr>
+    {% if results %}
+    <h5> Результат </h5>
+    <ul>
+    {% for r in results %}
+    <li> {{ r }} </li>
+    {% endfor %}
+    </ul>
+    {% endif %}
+{% endblock %}
+
