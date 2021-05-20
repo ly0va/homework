@@ -1,9 +1,12 @@
+# -*- coding: utf-8 -*-
 from django.db import models
+from django.urls import reverse
 
 
 class Currency(models.Model):
     class Meta:
         verbose_name_plural = "Currencies"
+        db_table = "currency"
 
     class Kind(models.IntegerChoices):
         FIAT = 0
@@ -19,6 +22,9 @@ class Currency(models.Model):
 
 
 class Account(models.Model):
+    class Meta:
+        db_table = "account"
+
     class Kind(models.IntegerChoices):
         CASH = 0
         DEBIT = 1
@@ -38,6 +44,7 @@ class Account(models.Model):
 class Category(models.Model):
     class Meta:
         verbose_name_plural = 'Categories'
+        db_table = "category"
 
     def __str__(self):
         return self.name
@@ -46,24 +53,22 @@ class Category(models.Model):
     description = models.TextField()
 
 
-class Reminder(models.Model):
-    def __str__(self):
-        return f'Reminder about {self.category}'
-
-    category = models.ForeignKey(Category, on_delete=models.CASCADE)
-    comment = models.TextField()
-    time = models.DateTimeField(auto_now_add=True)
-
 class Income(models.Model):
+    class Meta:
+        db_table = "income"
+
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     amount = models.BigIntegerField()
     date = models.DateField(auto_now_add=True)
 
+
 class Transfer(models.Model):
+    class Meta:
+        db_table = "transfer"
+
     from_account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='transfer_from_account')
     to_account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='transfer_to_account')
     from_amount = models.BigIntegerField()
     to_amount = models.BigIntegerField()
     date = models.DateField(auto_now_add=True)
-

@@ -1,0 +1,13 @@
+{% extends 'knox/base.html' %}
+
+{% block content %}
+    <h1 class="my-4"> Welcome to Knox!
+    </h1>
+    <div class="list-group">
+        <a class="list-group-item" href="{% url 'account_list' %}">Accounts</a>
+        <a class="list-group-item" href="{% url 'currency_list' %}">Currencies</a>
+        <a class="list-group-item" href="{% url 'income_list' %}">Income</a>
+        <a class="list-group-item" href="{% url 'transfer_list' %}">Transfers</a>
+        <a class="list-group-item" href="{% url 'category_list' %}">Categories</a>
+    </div>
+{% endblock %}
