@@ -1,0 +1,9 @@
+PUT http://localhost:3003/api/blogs/5f5a15f406b53a19648ff496
+Content-Type: application/json
+
+{
+    "title":"The solution to your problems are where you haven't looked yet",
+    "author":"Jordan Peterson",
+    "url": "lifeadvice.com",
+    "likes": 123
+}
