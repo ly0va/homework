@@ -10,4 +10,91 @@
         <a class="list-group-item" href="{% url 'transfer_list' %}">Transfers</a>
         <a class="list-group-item" href="{% url 'category_list' %}">Categories</a>
     </div>
+
+    <div style="width: 500px; height: 500px">
+        <canvas id="income_by_category"></canvas>
+    </div>
+
+    <div style="width: 1000px; height: 500px">
+        <canvas id="earnings_spendings"></canvas>
+    </div>
+
+    <script src="https://unpkg.com/chart.js"></script>
+    <script>
+        let income_by_category = {{ income_by_category |safe}};
+        let earnings = {{ earnings |safe }};
+        let spendings = {{ spendings |safe }};
+
+        let categories = Object.keys(income_by_category);
+        let accounts = Object.keys(earnings);
+        let data = Object.values(income_by_category);
+        let n = Math.max(categories.length, accounts.length);
+        let colors = [];
+        for (let i = 0; i < n; i++) {
+            colors[i] = `hsl(${360*i/n} 100% 50%)`;
+        }
+        let dataset = {
+          labels: categories,
+          datasets: [{
+            label: 'Income By Category',
+            data,
+            backgroundColor: colors,
+            hoverOffset: 10
+          }]
+        };
+        let config = {
+          type: 'doughnut',
+          data: dataset,
+          options: {
+            responsive: true,
+            plugins: {
+              title: {
+                display: true,
+                text: 'Income By Category'
+              }
+            }
+          },
+        };
+        let first_chart = new Chart(
+          document.getElementById('income_by_category'),
+          config
+        );
+
+        earnings = Object.values(earnings);
+        spendings = Object.values(spendings);
+        dataset = {
+          labels: accounts,
+          datasets: [
+            {
+              label: 'Earnings',
+              data: earnings,
+              backgroundColor: 'blue',
+            },
+            {
+              label: 'Spendings',
+              data: spendings,
+              backgroundColor: 'red',
+            }
+          ]
+        };
+
+        config = {
+          type: 'bar',
+          data: dataset,
+          options: {
+            responsive: true,
+            plugins: {
+              title: {
+                display: true,
+                text: 'Earnings and Spendings by Account'
+              }
+            }
+          },
+        };
+
+        let second_chart = new Chart(
+          document.getElementById('earnings_spendings'),
+          config
+        );
+    </script>
 {% endblock %}

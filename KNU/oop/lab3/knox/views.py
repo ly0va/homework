@@ -5,12 +5,31 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.http import HttpResponse
 from django.urls import reverse_lazy
 from django.shortcuts import render
+from django.db.models import Count, Sum, Q
 
 from .models import *
 from .forms import *
 
 def index(request):
-    return render(request, 'knox/index.html', context={})
+    # SELECT category.name, COUNT(income.id) FROM 
+    # income INNER JOIN category ON income.category_id = category.id
+    # GROUP BY category.id
+    result = Category.objects.annotate(num_payments=Count('income'))
+    income_by_category = {c.name: c.num_payments for c in result}
+
+    # SELECT account.name, SUM(income.amount) FROM
+    # income INNER JOIN account ON income.account_id = account.id
+    # WHERE income.amount > 0
+    # GROUP BY account.id
+    result = Account.objects.annotate(total=Sum('income__amount', filter=Q(income__amount__gt=0)))
+    earnings = {a.name : a.total or 0 for a in result}
+    result = Account.objects.annotate(total=Sum('income__amount', filter=Q(income__amount__lt=0)))
+    spendings = {a.name : -(a.total or 0) for a in result}
+    return render(request, 'knox/index.html', context={
+        'income_by_category': income_by_category,
+        'earnings': earnings,
+        'spendings': spendings
+    })
 
 class CurrencyList(ListView):
     model = Currency
