@@ -1,0 +1,91 @@
+---
+title: "Лабораторна 1"
+author: "Лев Потьомкiн"
+date: "27.09.2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Основнi показники
+
+```{r cars}
+# Завантаження
+data = read.csv("./film.csv", sep=";");
+lengths = as.numeric(na.omit(data$Length))
+
+# Середнє значення
+mean(lengths)
+# Медiана
+median(lengths)
+
+# Дисперciя
+var(lengths)
+# Стандартне відхилення
+sd(lengths)
+# Коефіцієнт варіації
+sd(lengths) / mean(lengths)
+# Розмах варіації
+diff(range(lengths))
+# Інтерквартильний розмах
+IQR(lengths)
+# 5-точкова характеристика
+summary(lengths)
+```
+
+## Ящик з вусами
+
+```{r}
+boxplot(lengths, main="Film lengths",
+        ylab="length (minutes)", range = 3)
+```
+```{r}
+# 1й та 9й децилi
+quantile(lengths, probs = seq(0, 1, 0.1))
+```
+```{r}
+library(moments)
+# Коеф. асиметрії
+skewness(lengths)
+# Коеф. ексцесу
+kurtosis(lengths)
+```
+## Гiстограми
+
+```{r}
+hist(lengths, breaks="Scott", freq=F)
+lines(density(lengths), col="blue", lwd=2)
+```
+```{r}
+hist(lengths, breaks="FD", freq=F)
+lines(density(lengths), col="blue", lwd=2)
+```
+
+```{r}
+hist(lengths, breaks="Scott", freq=F)
+# Гiпотетичний розподiл - нормальний
+curve(dnorm(x, mean=mean(lengths), sd=20), col="red", lwd=2, add=T)
+```
+
+## P-P та Q-Q дiаграми
+
+```{r}
+x = lengths
+plot(pnorm(sort(x), mean=mean(x), sd=20), (1:length(x))/length(x), 
+     xlab="Теоретична функція розподілу", ylab = "Емпірична функція розподілу")
+abline(0, 1, col="red", lwd=2)
+```
+
+```{r}
+qqnorm(x, asp=0.03)
+qqline(x)
+```
+
+## Перевiрка згоди з гiпотетичним розподiлом
+
+```{r}
+library("nortest")
+pearson.test(x)
+```
