@@ -14,7 +14,7 @@ public class Lab2 {
 
     public static boolean equivalent(DFA dfa1, DFA dfa2) {
         Integer totalSymbols = Math.max(dfa1.totalSymbols, dfa2.totalSymbols);
-        boolean used[][] = new boolean[totalSymbols][totalSymbols];
+        boolean used[][] = new boolean[dfa1.totalStates][dfa2.totalStates];
 
         Queue<Map.Entry<Integer, Integer>> queue = new LinkedList<>();
         queue.add(Map.entry(dfa1.startState, dfa2.startState));
