@@ -1,0 +1,59 @@
+---
+title: "Лабораторна 2"
+author: "Лев Потьомкiн"
+date: "10.10.2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Завантаження даних
+
+Зчитуємо датасет з csv файлу
+```{r}
+dataset = read.csv("./newborns.csv", header = TRUE)
+dataset = dataset[,c(2, 3, 5, 7, 8)]
+```
+
+5 записів з аналiзованих колонок:
+```{r echo=FALSE}
+tail(dataset, 5)
+```
+
+### Матрична діаграма розсіювання
+
+```{r}
+pairs(dataset, panel = panel.smooth)
+
+```
+
+### Граф кореляцій
+
+```{r}
+library("qgraph")
+qgraph(cor(dataset))
+```
+
+### Мапа кореляцій
+
+```{r}
+library(corrplot)
+corrplot.mixed(cor(dataset))
+```
+
+### Коефiцiенти кореляції
+
+Коеф. кореляції Пірсона
+```{r}
+cor.test(dataset$Gestation, dataset$Birthweight)
+```
+Коеф. кореляції Спірмена
+```{r}
+cor.test(dataset$Gestation, dataset$Birthweight, method = "spearman")
+```
+Коеф. кореляції Кендела
+```{r}
+cor.test(dataset$Gestation, dataset$Birthweight, method = "kendall")
+```
