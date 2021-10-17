@@ -5,16 +5,22 @@ import java.util.*;
 
 public class Lab1 {
     public static void main(String[] args) {
-        List<String> words = readWords("file.txt");
+        if (args.length < 2) {
+            System.out.println("Filename not specified");
+            return;
+        }
+
+        Set<String> words = readWords(args[1]);
+
         if (words != null) {
-            for (String word: mostDiverseWords(words)) {
+            for (String word: words) {
                 System.out.println(word);
             }
         }
     }
 
-    public static List<String> readWords(String filename) {
-        List<String> words = new ArrayList<String>();
+    public static Set<String> readWords(String filename) {
+        Set<String> words = new HashSet<String>();
         Scanner scanner;
 
         try {
@@ -27,7 +33,13 @@ public class Lab1 {
         while (scanner.hasNext()) {
             String line = scanner.nextLine();
             for (String word: line.split("\\W+")) {
-                words.add(word);
+                int letters = countLetters(word);
+                if (words.isEmpty() || countLetters(words.toArray()[0].toString()) < letters) {
+                    words.clear();
+                }
+                if (words.isEmpty() || countLetters(words.toArray()[0].toString()) == letters) {
+                    words.add(word);
+                }  
             }
         }
 
@@ -41,25 +53,5 @@ public class Lab1 {
             unique.add(letter);
         }
         return unique.size();
-    }
-
-    public static List<String> mostDiverseWords(List<String> words) {
-        List<String> result = new ArrayList<String>();
-        if (words.isEmpty()) {
-            return result;
-        }
-
-        Collections.sort(words, (a, b) -> countLetters(b).compareTo(countLetters(a)));
-        Integer maxDifferentLetters = countLetters(words.get(0));
-
-        for (String word: words) {
-            if (countLetters(word) == maxDifferentLetters) {
-                result.add(word);
-            } else {
-                break;
-            }
-        }
-
-        return result;
     }
 }

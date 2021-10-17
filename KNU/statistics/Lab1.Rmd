@@ -39,7 +39,7 @@ summary(lengths)
 
 ```{r}
 boxplot(lengths, main="Film lengths",
-        ylab="length (minutes)", range = 3)
+        ylab="length (minutes)")
 ```
 ```{r}
 # 1й та 9й децилi
@@ -66,14 +66,14 @@ lines(density(lengths), col="blue", lwd=2)
 ```{r}
 hist(lengths, breaks="Scott", freq=F)
 # Гiпотетичний розподiл - нормальний
-curve(dnorm(x, mean=mean(lengths), sd=20), col="red", lwd=2, add=T)
+curve(dnorm(x, mean=mean(lengths), sd=30), col="red", lwd=2, add=T)
 ```
 
 ## P-P та Q-Q дiаграми
 
 ```{r}
 x = lengths
-plot(pnorm(sort(x), mean=mean(x), sd=20), (1:length(x))/length(x), 
+plot(pnorm(sort(x), mean=mean(x), sd=29), (1:length(x))/length(x), 
      xlab="Теоретична функція розподілу", ylab = "Емпірична функція розподілу")
 abline(0, 1, col="red", lwd=2)
 ```
