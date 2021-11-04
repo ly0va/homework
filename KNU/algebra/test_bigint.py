@@ -38,6 +38,8 @@ def test_mul():
 def test_div_mod():
     assert BigInt('1234512345') // 5 == 246902469
     assert BigInt('123123') % 5 == 3
+    assert BigInt('111000222222') // BigInt('1000000000') == 111
+    assert BigInt('111000222222') % BigInt('1000000000') == 222222
 
 def test_sqrt():
     assert BigInt('0').sqrt() == 0

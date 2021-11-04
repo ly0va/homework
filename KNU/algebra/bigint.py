@@ -2,6 +2,7 @@
 
 import itertools as it
 import functools as ft
+from random import randint
 
 BASE = 10**9
 
@@ -66,6 +67,11 @@ class BigInt:
     def copy(self):
         return BigInt(self)
 
+    def __int__(self):
+        assert self < BASE
+        number = self.parts[0]
+        return number if self.sign == '+' else -number
+
     def __neg__(self):
         result = self.copy()
         result.sign = flip(self.sign)
@@ -108,6 +114,9 @@ class BigInt:
         result.normalize()
         return result
 
+    def __radd__(self, other):
+        return self + other
+
     def __abs__(self):
         result = self.copy()
         result.sign = '+'
@@ -138,6 +147,9 @@ class BigInt:
         result.normalize()
         return result
 
+    def __rsub__(self, other):
+        return - self + other
+
     def __mul__(self, other):
         other = BigInt(other)
         result = BigInt()
@@ -160,7 +172,11 @@ class BigInt:
         result.normalize()
         return result
 
-    def __divmod__(self, short):
+    def __rmul__(self, other):
+        return self * other
+
+    def _divmod(self, short: int):
+        # TODO: handle signs
         result = BigInt()
         result.parts = [0] * len(self.parts)
         carry = 0
@@ -168,7 +184,26 @@ class BigInt:
             result.parts[i], carry = divmod(self.parts[i] + carry * BASE, short)
 
         result.normalize()
-        return result, carry
+        return result, BigInt(carry)
+
+    def __divmod__(self, other):
+        # TODO: handle signs
+        other = BigInt(other)
+        if abs(other) < BASE:
+            return self._divmod(int(other))
+
+        left = BigInt(0)
+        right = self.copy()
+
+        while right-left > 1:
+            middle = (left + right) // 2
+            if middle*other > self:
+                right = middle
+            else:
+                left = middle
+
+        left.normalize()
+        return left, self - left*other
 
     def __floordiv__(self, short):
         result, _ = divmod(self, short)
@@ -178,13 +213,16 @@ class BigInt:
         _, result = divmod(self, short)
         return result
 
-    def __pow__(self, short):
+    def __pow__(self, power, mod = None):
         result = BigInt(1)
         a = self.copy()
-        while short:
-            if short & 1: result *= a
+        while power:
+            if power & 1: result *= a
             a *= a
-            short >>= 1
+            if mod:
+                result %= mod
+                a %= mod
+            power >>= 1
         return result
 
     def sqrt(self):
@@ -201,3 +239,69 @@ class BigInt:
 
         left.normalize()
         return left
+
+    # Newton's method for finding sqrt(N)
+    def isqrt(self):
+        assert self.sign == '+'
+        x = self.copy()
+        y = (x + 1) // 2
+        while y < x:
+            x = y
+            y = (x + n // x) // 2
+        return x
+
+    @staticmethod
+    def rand(upper_bound):
+        upper_bound = BigInt(upper_bound)
+        assert upper_bound > 0
+        num_parts = len(upper_bound.parts)
+        result = BigInt()
+        result.parts = [randint(0, BASE-1) for _ in range(num_parts-1)]
+        result.parts.append(randint(0, upper_bound.parts[-1]))
+        result.normalize()
+        return result
+
+    def gcd(self, other):
+        a, b = self.copy(), BigInt(other)
+        while b != 0:
+            a, b = b, a % b
+        return a
+
+    def gcd_extended(self, other):
+        a, b = self.copy(), BigInt(other)
+        if b == 0:
+            return (BigInt(1), BigInt(0), a)
+        x1, y1, gcd = b.gcd_extended(a % b)
+        x = y1 - (b // a) * x1
+        y = x1
+        return x, y, gcd
+
+    def lcm(self, other):
+        return self // self.gcd(other) * other
+
+
+def solve_congruence(cs, ms):
+    assert len(cs) == len(ms), "Invalid vector lengths"
+    can_use_crt = True
+    lcm = BigInt(1)
+    cs = list(map(BigInt, cs))
+    ms = list(map(BigInt, ms))
+
+    for c1, m1 in zip(cs, ms):
+        lcm = BigInt.lcm(lcm, m1)
+        for c2, m2 in zip(cs, ms):
+            if m1 == m2:
+                if c1 != c2: return None
+                else: continue
+            gcd = BigInt.gcd(m1, m2)
+            can_use_crt = can_use_crt and gcd == 1
+            if (c1 - c2) % gcd != 0:
+                return None
+
+    if not can_use_crt:
+        raise NotImplementedError("There is a solution, but I only know how to use CRT")
+
+    ns = [lcm // m for m in ms]
+    ks = [n.gcd_extended(m)[0] for n, m in zip(ns, ms)]
+    return sum(c*k*n % lcm for c, k, n in zip(cs, ks, ns)) % lcm
+
