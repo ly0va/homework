@@ -51,7 +51,7 @@ public class Lab3 {
         int start = 0;
         while (matcher.find()) {
             if (start != matcher.start()) {
-                 System.err.println("Invalid token");
+                 System.err.println("\nInvalid token: " + source.substring(start, matcher.start()));
                  return false;
             } else {
                 start = matcher.end();
@@ -65,11 +65,6 @@ public class Lab3 {
                 }
             }
         }
-
-        // if (!matcher.requireEnd()) {
-        //     System.err.println("Invalid token");
-        //     return false;
-        // }
 
         return true;
     }
