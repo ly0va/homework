@@ -176,13 +176,17 @@ class BigInt:
         return self * other
 
     def _divmod(self, short: int):
-        # TODO: handle signs
         result = BigInt()
+        if self.sign == '-' and short > 0 or \
+           self.sign == '+' and short < 0:
+            result.sign = '-'
         result.parts = [0] * len(self.parts)
         carry = 0
         for i in range(len(self.parts)-1, -1, -1):
             result.parts[i], carry = divmod(self.parts[i] + carry * BASE, short)
 
+        if result.sign == '-':
+            carry = short - carry
         result.normalize()
         return result, BigInt(carry)
 
