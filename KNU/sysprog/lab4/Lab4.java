@@ -149,9 +149,13 @@ public class Lab4 {
                             state = State.None;
                         }
                     } else {
-                        // TODO: check if the number in the buffer is ok
-                        log(buffer, "Number");
-                        state = State.None;
+                        try {
+                            Double.parseDouble(buffer);
+                            log(buffer, "Number");
+                            state = State.None;
+                        } catch (NumberFormatException e) {
+                            state = State.Error;
+                        }
                     }
                 case Comment:
                     if (symbol != '\n') {
@@ -162,7 +166,7 @@ public class Lab4 {
                     i++;
                     break;
                 case Error:
-                    System.err.println("\nInvalid token: " + symbol);
+                    System.err.println("\nInvalid token");
                     break;
             }
         }
