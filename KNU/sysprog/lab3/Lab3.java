@@ -10,7 +10,7 @@ public class Lab3 {
         Number("\\b\\d+(\\.\\d+)?(e[+-]?\\d+)?\\b"),
         String("\"[^\"]*\"|'[^']*'|`[^`]*`"),
         Comment("//.*"),
-        Keyword("\\b(break|case|catch|class|const|continue|debugger|default|delete|do|else|export|extends|finally|for|function|if|import|in|instanceof|new|return|super|switch|this|throw|try|typeof|var|void|while|with|yield)\\b"),
+        Keyword("\\b(break|case|catch|class|const|continue|debugger|default|delete|do|else|export|extends|finally|for|function|if|import|in|instanceof|let|new|return|super|switch|this|throw|try|typeof|var|void|while|with|yield)\\b"),
         Identifier("\\b[a-zA-Z_$][a-zA-Z_$0-9]*\\b"),
         Operator("(\\+\\+|\\+|--|-|\\*\\*|/|%|\\*|<<|<|>>>|>>|>|==|=|!=|!|&&|\\^|\\|\\||&|\\||\\?\\?)=?|\\?|~"),
         Punctuation("[;:,\\.\\{\\}\\[\\]\\(\\)]");

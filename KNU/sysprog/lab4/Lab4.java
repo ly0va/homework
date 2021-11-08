@@ -5,7 +5,7 @@ import java.io.*;
 public class Lab4 {
     private final String[] keywords = {
         "break", "case", "catch", "class", "const", "continue", "debugger", "default", "delete", "do", "else", 
-        "export", "extends", "finally", "for", "function", "if", "import", "in", "instanceof", "new", "return", 
+        "export", "extends", "finally", "for", "function", "if", "import", "in", "instanceof", "let", "new", "return", 
         "super", "switch", "this", "throw", "try", "typeof", "var", "void", "while", "with", "yield"
     };
     private final String[] operators = {
