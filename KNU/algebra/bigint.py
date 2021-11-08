@@ -97,6 +97,8 @@ class BigInt:
 
     def __add__(self, other):
         other = BigInt(other)
+        if other == 0:
+            return self.copy()
         if self.sign != other.sign:
             return self - (-other)
 
@@ -124,6 +126,8 @@ class BigInt:
 
     def __sub__(self, other):
         other = BigInt(other)
+        if other == 0:
+            return self.copy()
         if self.sign != other.sign:
             return self + (-other)
 
@@ -177,15 +181,15 @@ class BigInt:
 
     def _divmod(self, short: int):
         result = BigInt()
-        if self.sign == '-' and short > 0 or \
-           self.sign == '+' and short < 0:
-            result.sign = '-'
         result.parts = [0] * len(self.parts)
         carry = 0
         for i in range(len(self.parts)-1, -1, -1):
             result.parts[i], carry = divmod(self.parts[i] + carry * BASE, short)
 
-        if result.sign == '-':
+        # TODO: does not work for negative short
+        if self.sign == '-' and short > 0 or \
+           self.sign == '+' and short < 0:
+            result.sign = '-'
             carry = short - carry
         result.normalize()
         return result, BigInt(carry)
@@ -198,6 +202,8 @@ class BigInt:
 
         left = BigInt(0)
         right = self.copy()
+        if self < 0:
+            left, right = right, left
 
         while right-left > 1:
             middle = (left + right) // 2
@@ -207,7 +213,10 @@ class BigInt:
                 left = middle
 
         left.normalize()
-        return left, self - left*other
+        mod = self - left*other
+        if mod < 0:
+            mod += other
+        return left, mod
 
     def __floordiv__(self, short):
         result, _ = divmod(self, short)
@@ -218,15 +227,15 @@ class BigInt:
         return result
 
     def __pow__(self, power, mod = None):
-        result = BigInt(1)
+        result, power = BigInt(1), BigInt(power)
         a = self.copy()
-        while power:
-            if power & 1: result *= a
+        while power != 0:
+            if power % 2 == 1: result *= a
             a *= a
             if mod:
                 result %= mod
                 a %= mod
-            power >>= 1
+            power //= 2
         return result
 
     def sqrt(self):
@@ -273,9 +282,9 @@ class BigInt:
 
     def gcd_extended(self, other):
         a, b = self.copy(), BigInt(other)
-        if b == 0:
-            return (BigInt(1), BigInt(0), a)
-        x1, y1, gcd = b.gcd_extended(a % b)
+        if a == 0:
+            return (BigInt(0), BigInt(1), b)
+        x1, y1, gcd = (b % a).gcd_extended(a)
         x = y1 - (b // a) * x1
         y = x1
         return x, y, gcd
@@ -283,29 +292,7 @@ class BigInt:
     def lcm(self, other):
         return self // self.gcd(other) * other
 
+    def __hash__(self):
+        return hash((self.sign, tuple(self.parts)))
 
-def solve_congruence(cs, ms):
-    assert len(cs) == len(ms), "Invalid vector lengths"
-    can_use_crt = True
-    lcm = BigInt(1)
-    cs = list(map(BigInt, cs))
-    ms = list(map(BigInt, ms))
-
-    for c1, m1 in zip(cs, ms):
-        lcm = BigInt.lcm(lcm, m1)
-        for c2, m2 in zip(cs, ms):
-            if m1 == m2:
-                if c1 != c2: return None
-                else: continue
-            gcd = BigInt.gcd(m1, m2)
-            can_use_crt = can_use_crt and gcd == 1
-            if (c1 - c2) % gcd != 0:
-                return None
-
-    if not can_use_crt:
-        raise NotImplementedError("There is a solution, but I only know how to use CRT")
-
-    ns = [lcm // m for m in ms]
-    ks = [n.gcd_extended(m)[0] for n, m in zip(ns, ms)]
-    return sum(c*k*n % lcm for c, k, n in zip(cs, ks, ns)) % lcm
 

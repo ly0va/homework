@@ -167,7 +167,9 @@ public class Lab4 {
                     break;
                 case Error:
                     System.err.println("\nInvalid token");
-                    break;
+                    return;
+                case End:
+                    return;
             }
         }
     }
