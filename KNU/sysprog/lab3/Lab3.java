@@ -61,6 +61,9 @@ public class Lab3 {
                     if (type != LexemeType.Whitespace && type != LexemeType.Comment) {
                         System.out.println(matcher.group() + " - " + type.name());
                     }
+                    if (type == LexemeType.Comment) {
+                        System.out.println(type.name());
+                    }
                     break;
                 }
             }
