@@ -29,22 +29,21 @@ class Point:
             return other.copy()
         if other == Point.O:
             return self.copy()
+        if self == -other:
+            return Point.O.copy()
 
-        if self.x == other.x:
-            if self.y == -other.y:
-                return Point.O
-            else:
-                k = (3 * self.x**2 + Point.a) * Point.inv(2 * self.y)
+        if self == other:
+            k = (3 * self.x**2 + Point.a) * Point.inv(2 * self.y)
         else:
             k = (other.y - self.y) * Point.inv(other.x - self.x)
 
         k %= Point.p
-        x = k**2 - self.x - other.x
+        x = k*k - self.x - other.x
         y = k*(self.x - x) - self.y
         return Point(x, y)
 
     def __mul__(self, n):
-        result = Point.O
+        result = Point.O.copy()
         point = self.copy()
         while n > 0:
             if n & 1: result += point

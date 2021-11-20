@@ -69,7 +69,6 @@ def jacobi_symbol(a, p):
 def euler_phi(a):
     result = BigInt(a)
     factors = sorted(set(factorize(a)))
-    print(factors)
     for p in factors:
         result -= result // p
     return result
@@ -122,7 +121,7 @@ def discrete_log_shanks(a, b, m):
     while n >= i:
         values[pow(a, i*n, m)] = i
         i += 1
-    
+
     i = 0
     while n >= i:
         cur = pow(a, i, m) * b % m;
