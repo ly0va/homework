@@ -1,2 +1,5 @@
 .vim
 tags
+.ipynb_checkpoints
+.pytest_cache
+__pycache__
