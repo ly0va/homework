@@ -1,0 +1,56 @@
+---
+title: "Lab4"
+author: "Lev Potomkin"
+date: "11/23/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Load data
+
+```{r data}
+data <- force(iris)
+colors <- c("red", "green", "cyan")
+head(data)
+```
+
+## Diagrams
+
+```{r diagrams}
+stripchart(data$Petal.Length ~ data$Species, xlab = "Petal length", ylab = "Species", col = colors, 
+           group.names=c("setosa", "versicolor", "verginica"))
+
+means <- tapply(data$Petal.Length, data$Species, mean)
+points(x = means, y = 1:length(means), col="black", bg="black")
+
+M1 <- aov(data$Petal.Length ~ data$Species, data = data)
+summary(M1)
+summary(lm(data$Petal.Length ~ data$Species, data = data))
+
+boxplot(data$Petal.Length ~ data$Species, data = data,
+        xlab = "Petal length", ylab = "Species", col = colors, outline=FALSE)
+```
+
+# Homogenity of variances
+
+```{r}
+boxplot(resid(M1) ~ data$Species, data=data, method = "jitter",
+        col = c("red", "green", "cyan"), xlab = "Species", ylab = "residues")
+
+tapply(data$Petal.Length, data$Species, var)
+
+bartlett.test(data$Petal.Length ~ data$Species)
+oneway.test(data$Petal.Length ~ data$Species)
+```
+
+
+## Contrast analysis
+
+```{r contrast analysis}
+contrasts(data$Species) <- contr.sum(n = 3)
+contrasts(data$Species)
+```
+

@@ -1,0 +1,97 @@
+---
+title: "Лабораторна 6. Кластерний Аналiз"
+author: "Потьомкiн Лев"
+date: "30.11.2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(factoextra)
+library(cluster)
+library(fpc)
+library(fossil)
+options(warn = -1) 
+```
+
+## Датасет - характеристики вин
+
+```{r}
+data = read.csv("./wine.csv", header=TRUE)
+labels = data$Class
+data = data[2:14]
+plot(data, cex=0.01)
+```
+
+## Матриця відстаней
+
+Використовуємо евклідову відстань, адже всі змінні кількісні.
+
+```{r}
+d = dist(data, method = "euclidean")
+dists = get_dist(data, stand = TRUE)
+fviz_dist(dists, show_labels = FALSE)
+```
+
+## Ієрархічна кластеризація
+
+- Метод дальнього сусіда
+
+```{r}
+data = scale(data)
+
+results.hc1 = hclust(d, method = "complete")
+fviz_dend(results.hc1, rect = TRUE, show_labels = FALSE, k=3)
+```
+
+- Метод Ворда
+
+```{r}
+results.hc2 = hclust(d, method = "ward.D2")
+fviz_dend(results.hc2, rect = TRUE, show_labels = FALSE, k=3)
+```
+
+## Визначення оптимальної кількості кластерів
+
+З дендрограм суб'єктивно видно, що можлива оптимальна к-ть кластерів - 3.
+
+Впевнимося в цьюму, застосувавши:
+
+- Метод ліктя
+- Метод силуета
+- Gap-статистику
+
+```{r}
+fviz_nbclust(data, kmeans, method = "wss")
+fviz_nbclust(data, kmeans, method = "silhouette")
+fviz_nbclust(data, pam, method = "silhouette")
+fviz_nbclust(data, kmeans, nstart = 25, method = "gap_stat", nboot = 100)
+```
+
+## Неієрархічні методи кластеризації
+
+- Метод к-середніх
+
+```{r}
+results.kmeans3 <- kmeans(data, 3)
+fviz_cluster(results.kmeans3, data)
+```
+
+- Метод к-медоїдів
+
+```{r}
+results.pam = pam(data, 3)
+fviz_cluster(results.pam)
+```
+
+## Оцінка якості кластеризації за індексом Ренда
+
+Так як дані були попередньо розмічені, використаємо це для зовнішньої оцінки якості.
+
+```{r}
+rand.index(labels, cutree(results.hc1, k = 3))
+rand.index(labels, cutree(results.hc2, k = 3))
+rand.index(labels, results.pam$clustering)
+rand.index(labels, results.kmeans3$cluster)
+```
+Бачимо, що кластеризація методом к-середніх виявилась найбільш якісною.

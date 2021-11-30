@@ -1,0 +1,65 @@
+---
+title: "Lab5"
+author: "Lev Potomkin"
+date: "11/23/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Time series
+```{r data}
+data <- force(AirPassengers)
+data.ts <- ts(data, start = c(1949,1), frequency = 12)
+data.ts
+plot(data.ts, xlab = "Time", ylab = "Airline Passenger Numbers")
+plot(log(data.ts), xlab = "Time", ylab = "log(Airline Passenger Numbers)")
+
+```
+
+## Simple Moving Average
+```{r sma}
+plot(stats::filter(data.ts, rep(1/4, 4)))
+plot(stats::filter(data.ts, rep(1/12, 12)))
+
+```
+
+## Decompose
+```{r decomp}
+plot(decompose(data.ts, type="multiplicative"))
+```
+
+## Correlogram
+```{r}
+# логарифмуємо дані для стабілізації дисперсії
+# продиференцiюемо для усунення тренду
+# виставимо перiод 12 щоб позбутись сезонностi
+transformed.ts = diff(log(data.ts))
+plot(transformed.ts)
+acf(transformed.ts)
+pacf(transformed.ts)
+```
+
+
+# Predictions
+```{r hwm}
+## Seasonal Holt-Winter's
+m <- HoltWinters(data.ts)
+p <- predict(m, 12, prediction.interval = TRUE)
+plot(m, p)
+```
+
+
+## ARIMA
+```{r arima}
+#ar(transformed.ts)
+library(astsa)
+sarima(transformed.ts, p=1, d=1, q=2)
+```
+
+
+
+
+
