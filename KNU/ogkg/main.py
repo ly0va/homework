@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -17,7 +18,7 @@ def plot_lines(points, tree, edges):
     for line in tree:
         data.append((line[0][0], line[1][0]))
         data.append((line[0][1], line[1][1]))
-        data.append('black')
+        data.append('k')
 
     plt.plot(*data)
 
@@ -44,7 +45,7 @@ def gen_circle(n):
 
 from delaunay import Delaunay
 from kruskal import Kruskal
-points = gen_random(500)
+points = gen_random(20)
 edges = Delaunay().run(points)
 tree = Kruskal().run(edges)
 plot_lines(points, tree, edges)
