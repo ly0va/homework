@@ -8,10 +8,16 @@ def plot_lines(points, tree, edges):
     plt.xlim((-5, 105))
 
     data = []
+
+    for line in set(edges) - set(tree):
+        data.append((line[0][0], line[1][0]))
+        data.append((line[0][1], line[1][1]))
+        data.append('y:')
+
     for line in tree:
         data.append((line[0][0], line[1][0]))
         data.append((line[0][1], line[1][1]))
-        data.append('red')
+        data.append('black')
 
     plt.plot(*data)
 
@@ -38,7 +44,7 @@ def gen_circle(n):
 
 from delaunay import Delaunay
 from kruskal import Kruskal
-points = gen_random(100)
+points = gen_random(500)
 edges = Delaunay().run(points)
 tree = Kruskal().run(edges)
 plot_lines(points, tree, edges)
