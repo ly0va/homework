@@ -1,6 +1,6 @@
 use rand::prelude::*;
 use std::sync::{Arc, Condvar, Mutex};
-use std::thread::sleep;
+use std::thread;
 use std::time::Duration;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -69,7 +69,7 @@ impl<const N: usize> Table<N> {
     fn do_stuff(&self, i: usize, stuff: &str) {
         println!("Philosopher #{} is {}.", i, stuff);
         let duration = Duration::from_millis(rand::thread_rng().gen_range(1000..2000));
-        sleep(duration);
+        thread::sleep(duration);
     }
 
     fn start_dinner(self) {
@@ -78,7 +78,7 @@ impl<const N: usize> Table<N> {
 
         for i in 0..N {
             let table = Arc::clone(&table);
-            let handle = std::thread::spawn(move || loop {
+            let handle = thread::spawn(move || loop {
                 table.do_stuff(i, "thinking");
                 table.take_chopsticks(i);
                 table.do_stuff(i, "eating");

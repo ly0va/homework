@@ -1,7 +1,7 @@
 import numpy as np
 
 class Delaunay:
-    
+
     def __init__(self):
         self.edges = set()
 
@@ -29,10 +29,10 @@ class Delaunay:
     def run(self, points):
         if len(points) < 2:
             return set()
-        
+
         points = np.array(points)
         dtype = points.dtype
-        
+
         points.view(dtype=[('x', dtype), ('y', dtype)]).sort(order=['x', 'y'], axis=0)
         points = np.unique(points, axis=0)
 
@@ -75,9 +75,9 @@ class Delaunay:
 
         base = self.connect(left_inside.rev, right_inside)
 
-        if left_inside.start[0] == left_outside.start[0] and left_inside.start[1] == left_outside.start[1]:
+        if np.array_equal(left_inside.start, left_outside.start):
             left_outside = base
-        if right_inside.start[0] == right_outside.start[0] and right_inside.start[1] == right_outside.start[1]:
+        if np.array_equal(right_inside.start, right_outside.start):
             right_outside = base.rev
 
         # Merge
@@ -92,16 +92,16 @@ class Delaunay:
             if valid_right_candidate:
                 while right_of(right_candidate.next.end, base) and \
                       in_circle(base.end, base.start, right_candidate.end, right_candidate.next.end):
-                    t = right_candidate.next
+                    temp = right_candidate.next
                     self.delete_edge(right_candidate)
-                    right_candidate = t
+                    right_candidate = temp
 
             if valid_left_candidate:
                 while right_of(left_candidate.prev.end, base) and \
                       in_circle(base.end, base.start, left_candidate.end, left_candidate.prev.end):
-                    t = left_candidate.prev
+                    temp = left_candidate.prev
                     self.delete_edge(left_candidate)
-                    left_candidate = t
+                    left_candidate = temp
 
             if not valid_right_candidate or \
                (valid_left_candidate and in_circle(right_candidate.end, right_candidate.start, left_candidate.start, left_candidate.end)):

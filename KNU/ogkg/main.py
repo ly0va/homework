@@ -43,6 +43,7 @@ def gen_circle(n):
     cx = cy = r = 50
     return [(int(cx + r * np.cos(i)), int(cy + r * np.sin(i))) for i in rads][:-1]
 
+
 from delaunay import Delaunay
 from kruskal import Kruskal
 points = gen_random(20)
