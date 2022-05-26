@@ -6,16 +6,16 @@ int with_mutex() {
     int value = 0;
     std::mutex value_mutex;
 
-    auto increment = [&](int& x) {
+    auto increment = [&]() {
         int i = 1000000;
         while (i--) {
              std::lock_guard<std::mutex> guard(value_mutex);
-             ++x;
+             ++value;
         }
     };
 
-    std::thread t0(increment, std::ref(value));
-    std::thread t1(increment, std::ref(value));
+    std::thread t0(increment);
+    std::thread t1(increment);
 
     t0.join();
     t1.join();
@@ -26,13 +26,13 @@ int with_mutex() {
 int using_atomics() {
     std::atomic_int value(0);
 
-    auto increment = [](atomic_int& x) {
+    auto increment = [&]() {
         int i = 1000000;
-        while (i--) x.fetch_add(1);
+        while (i--) value.fetch_add(1);
     };
 
-    std::thread t0(increment, std::ref(value));
-    std::thread t1(increment, std::ref(value));
+    std::thread t0(increment);
+    std::thread t1(increment);
 
     t0.join();
     t1.join();
@@ -43,13 +43,13 @@ int using_atomics() {
 int no_protection() {
     int value = 0;
 
-    auto increment = [](int& x) { 
+    auto increment = [&]() { 
         int i = 1000000;
-        while (i--) ++x;
+        while (i--) ++value;
     };
 
-    std::thread t0(increment, std::ref(value));
-    std::thread t1(increment, std::ref(value));
+    std::thread t0(increment);
+    std::thread t1(increment);
 
     t0.join();
     t1.join();
@@ -67,7 +67,7 @@ int main(int argc, char **argv) {
 
     now = clock();
     result = with_mutex();
-    printf("Incrementing a shared value (with mutex)    yielded: %d in %.3f sec\n", result, double(clock() - now) / CLOCKS_PER_SEC);
+    printf("Incrementing a shared value (with a mutex)  yielded: %d in %.3f sec\n", result, double(clock() - now) / CLOCKS_PER_SEC);
 
     now = clock();
     result = using_atomics();
