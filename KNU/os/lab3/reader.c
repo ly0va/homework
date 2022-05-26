@@ -19,15 +19,15 @@ int main(int argc, char* argv[]) {
   sprintf(proc_mem, "/proc/%d/mem", pid);
 
   printf("opening %s, address is %ld\n", proc_mem, addr);
-  int fd_proc_mem = open(proc_mem, O_RDONLY);
+  int mem_fd = open(proc_mem, O_RDONLY);
 
-  if (fd_proc_mem == -1) {
+  if (mem_fd == -1) {
     printf("Could not open %s\n", proc_mem);
     exit(1);
   }
 
   char* buf = malloc(len+1);
-  pread(fd_proc_mem, buf, len, addr);
+  pread(mem_fd, buf, len, addr);
 
   printf("String at %lx in process %d is:\n", addr, pid);
   printf("%s\n", buf);
