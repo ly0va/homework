@@ -10,7 +10,7 @@ int main(int argc, char *argv[]) {
     /* printf("Number of threads = %d\n", omp_get_max_threads()); */
     printf("         N        Pi          Time\n\n");
 
-    count_primes_loop(1, 10000000, 10);
+    count_primes_loop(100000, 20000000, 2);
 
     printf("\nDone\n");
 

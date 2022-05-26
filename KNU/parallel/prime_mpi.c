@@ -24,7 +24,7 @@ int main(int argc, char *argv[]) {
         printf("         N        Pi          Time\n\n");
     }
 
-    count_primes_loop(1, 10000000, 10, p, id);
+    count_primes_loop(100000, 20000000, 2, p, id);
 
     MPI_Finalize();
 

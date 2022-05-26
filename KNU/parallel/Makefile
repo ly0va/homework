@@ -1,13 +1,13 @@
 all: prime_mpi prime_openmp prime_sequential
 
 prime_mpi: prime_mpi.c
-	mpicc -Wall $^ -o $@
+	mpicc -O2 -Wall $^ -o $@
 
 prime_openmp: prime_openmp.c
-	gcc -Wall -fopenmp $^ -o $@
+	gcc -O2 -Wall -fopenmp $^ -o $@
 
 prime_sequential: prime_sequential.c
-	gcc -Wall $^ -o $@
+	gcc -O2 -Wall $^ -o $@
 
 clean:
 	rm -f prime_{sequential,mpi,openmp}

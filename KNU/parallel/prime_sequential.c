@@ -8,7 +8,7 @@ void count_primes_loop(int from, int to, int step);
 
 int main(int argc, char *argv[]) {
     printf("         N        Pi          Time\n\n");
-    count_primes_loop(1, 10000000, 10);
+    count_primes_loop(100000, 20000000, 2);
     printf("\nDone\n");
     return 0;
 }
