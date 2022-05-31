@@ -5,8 +5,6 @@ import matplotlib.pyplot as plt
 
 def plot_lines(points, tree, edges):
     plt.axis('equal')
-    plt.ylim((-5, 105))
-    plt.xlim((-5, 105))
 
     data = []
 

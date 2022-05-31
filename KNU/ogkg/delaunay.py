@@ -1,4 +1,4 @@
-import numpy as np
+from __future__ import division
 
 class Delaunay:
 
@@ -28,16 +28,12 @@ class Delaunay:
 
     def run(self, points):
         if len(points) < 2:
-            return set()
+            return []
 
-        points = np.array(points)
-        dtype = points.dtype
-
-        points.view(dtype=[('x', dtype), ('y', dtype)]).sort(order=['x', 'y'], axis=0)
-        points = np.unique(points, axis=0)
+        points = sorted(set(points))
 
         self.triangulate(points)
-        return [(tuple(edge.start), tuple(edge.end)) for edge in self.edges]
+        return [(edge.start, edge.end) for edge in self.edges]
 
 
     def triangulate(self, points):
@@ -75,9 +71,9 @@ class Delaunay:
 
         base = self.connect(left_inside.rev, right_inside)
 
-        if np.array_equal(left_inside.start, left_outside.start):
+        if left_inside.start == left_outside.start:
             left_outside = base
-        if np.array_equal(right_inside.start, right_outside.start):
+        if right_inside.start == right_outside.start:
             right_outside = base.rev
 
         # Merge
@@ -127,7 +123,6 @@ class Edge:
 
         self.next.prev, other.next.prev = other, self
         self.next, other.next = other.next, self.next
-
 
 def in_circle(a, b, c, d):
     a1, a2 = a[0]-d[0], a[1]-d[1]
