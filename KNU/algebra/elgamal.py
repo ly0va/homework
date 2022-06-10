@@ -37,7 +37,7 @@ class Point:
         else:
             k = (other.y - self.y) * Point.inv(other.x - self.x)
 
-        k %= Point.p
+        k %= self.p
         x = k*k - self.x - other.x
         y = k*(self.x - x) - self.y
         return Point(x, y)
