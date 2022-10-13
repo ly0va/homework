@@ -34,8 +34,6 @@ class Solver:
     @staticmethod
     @expose
     def compute(matrix_a, matrix_b, start, step):
-        print("start", start)
-        print("step", step)
         n = len(matrix_a)
         answer = float('-inf')
 
