@@ -23,7 +23,7 @@ class Solver:
         p = len(self.workers)
 
         for i in xrange(p):
-            mapped.append(self.workers[i].compute(matrix_a, matrix_b, i, p))
+            mapped.append(self.workers[i].compute(matrix_a[i::p], matrix_b))
 
         # reduce
         max_element = self.reduce(mapped)
@@ -33,13 +33,14 @@ class Solver:
 
     @staticmethod
     @expose
-    def compute(matrix_a, matrix_b, start, step):
-        n = len(matrix_a)
+    def compute(matrix_a, matrix_b):
+        n = len(matrix_a[0])
+        assert n == len(matrix_b), "Matrix A and B are not compatible"
         answer = float('-inf')
 
-        for i in xrange(start, n, step):
+        for i in xrange(len(matrix_a)):
             row = [0] * n
-            for j in xrange(n):
+            for j in xrange(len(matrix_b[0])):
                 row[j] = sum(matrix_a[i][k] * matrix_b[k][j] for k in xrange(n))
             answer = max(answer, max(row))
 
