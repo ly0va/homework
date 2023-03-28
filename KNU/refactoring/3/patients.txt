@@ -1,0 +1,7 @@
+Patients
+id,name,diagnosis
+1,John,diabetes
+2,Paul,asthma
+3,George,asthma
+4,Ringo,tuberculosis
+5,Linda,pneumonia

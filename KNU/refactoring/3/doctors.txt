@@ -1,0 +1,8 @@
+Doctors
+id,name,specialty,age
+1,John Smith,Cardiology,45
+2,Jackie Jackson,Orthopedics,32
+3,Chris Jones,Oncology,55
+4,Amanda Cullen,Pediatrics,21
+5,Jeremy Goodwin,Traumatology,43
+
