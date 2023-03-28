@@ -1,20 +1,20 @@
 import parcs.*;
 import java.io.*;
-import java.util.ArrayList;
+import java.util.*;
 import java.math.BigDecimal;
 
 public class Main implements AM {
     public static void main(String[] args) {
         task t = new task();
-        t.addJarFile("Main.jar");
+        t.addJarFile("Pi.jar");
         new Main().run(new AMInfo(t, (channel)null));
         t.end();
     }
 
     public void run(AMInfo info) {
-      BufferedReader in = new BufferedReader(new FileReader(info.curtask.findFile("input.txt")));
-      int n = in.readInt();
-      int workers = in.readInt();
+      Scanner in = new Scanner(System.in);
+      int n = in.nextInt();
+      int workers = in.nextInt();
       int step = (n - 1) / workers + 1;
 
       ArrayList<channel> channels = new ArrayList<channel>();
@@ -32,15 +32,12 @@ public class Main implements AM {
       System.out.println("Computing...");
 
       BigDecimal sum = BigDecimal.ZERO;
-      for (int i = 0; i < info.curtask.getPointsCount(); i++) {
+      for (int i = 0; i < channels.size(); i++) {
         BigDecimal part = (BigDecimal)channels.get(i).readObject();
         sum = sum.add(part);
       }
 
-      System.out.println("Done.");
-
-      PrintWriter out = new PrintWriter(new FileWriter(info.curtask.addPath("output.txt")));
-      out.println(sum);
-      out.close();
+      System.out.println("Done.\n");
+      System.out.println("Pi = " + sum);
     }
 }
